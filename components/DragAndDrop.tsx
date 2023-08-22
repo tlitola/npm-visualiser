@@ -1,16 +1,18 @@
 "use client"
 
-import { faFileArrowDown } from "@fortawesome/free-solid-svg-icons"
+import { PackageLock } from "@/utils/PackageLock"
+import { faFileArrowDown, faCircleExclamation } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { ChangeEvent, Dispatch, DragEventHandler, SetStateAction, useRef, useState } from "react"
 import { Button, Card, CardBody, CardText, CardTitle } from "react-bootstrap"
 
-export default function DragAndDrop({ file, setFile }: { file: File | undefined, setFile: Dispatch<SetStateAction<File | undefined>> }) {
+export default function DragAndDrop({ file, setFile }: { file: PackageLock | undefined, setFile: Dispatch<SetStateAction<PackageLock | undefined>> }) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
   const [droppable, setDroppable] = useState(false)
+  const [error, setError] = useState<string>()
 
-  const startWindowDrag: DragEventHandler = (e) => { e.preventDefault(); setDragging(true) }
+  const startWindowDrag: DragEventHandler = (e) => { e.preventDefault(); setDragging(true); setError(undefined) }
   const stopWindowDrag: DragEventHandler = (e) => { e.preventDefault(); setDragging(false) }
   const startDrag: DragEventHandler = (e) => { e.preventDefault(); setDroppable(true) }
   const stopDrag: DragEventHandler = (e) => { e.preventDefault(); setDroppable(false) }
@@ -18,7 +20,20 @@ export default function DragAndDrop({ file, setFile }: { file: File | undefined,
   const maybeSetFile = (newFile: File) => {
     if (newFile?.type !== "application/json") return
 
-    setFile(newFile)
+    const reader = new FileReader()
+    reader.readAsText(newFile)
+    reader.onerror = () => setError(reader.error?.message)
+
+    reader.onload = () => {
+      if (!reader.result) return
+
+      try {
+        setError(undefined)
+        setFile(JSON.parse(reader.result.toString()))
+      } catch (error) {
+        setError("Couldn't parse the file, please make sure it is valid JSON")
+      }
+    }
   }
 
   const handleDrop: DragEventHandler<HTMLInputElement> = (e) => {
@@ -43,7 +58,7 @@ export default function DragAndDrop({ file, setFile }: { file: File | undefined,
   return (
     <>
       <div className={`${!dragging && "opacity-0"} transition-all  bg-black h-screen w-screen fixed top-0 left-0 opacity-20 ${droppable && "opacity-10"}`} onDragEnter={startWindowDrag} onDrop={stopWindowDrag} onDragOver={startWindowDrag} onDragLeave={stopWindowDrag} />
-      <Card bg={`${!droppable && "light"}`} border={`${!droppable ? "secondary" : "info"}`} className={`w-3/5 !bg-blue-100 border-2 ${!droppable && "!border-dashed"} transition-all box-border`} onDragEnter={startDrag} onDragLeave={stopDrag} onDrop={handleDrop} onDragOver={(e) => { startDrag(e); startWindowDrag(e) }}>
+      <Card bg={`${(!droppable && !error) && "light"}`} border={`${error ? "danger" : !droppable ? "secondary" : "info"}`} className={`w-3/5 ${error ? "!bg-rose-100" : "!bg-blue-100"} border-2 ${!droppable && "!border-dashed"} transition-all box-border`} onDragEnter={startDrag} onDragLeave={stopDrag} onDrop={handleDrop} onDragOver={(e) => { startDrag(e); startWindowDrag(e) }}>
 
         <CardBody className='text-center !space-y-3'>
           {/* The icon seems to cause shifting*/}
@@ -52,8 +67,8 @@ export default function DragAndDrop({ file, setFile }: { file: File | undefined,
           <CardText className={`${droppable && "text-blue-600"} text-center m-0`}>or</CardText>
 
           <input accept='.json' ref={fileInputRef} type="file" className='hidden' onChange={handleFileSubmit} />
-          <Button disabled={!!file || droppable} onClick={() => { fileInputRef.current?.click() }}>Choose a File</Button>
-          <p className={`${!file && "hidden"} m-0`}>{file?.name}</p>
+          <Button disabled={!error && (!!file || droppable)} onClick={() => { fileInputRef.current?.click() }}>Choose a File</Button>
+          <p className={`${!error && "hidden"} m-0 text-red-700`}><FontAwesomeIcon icon={faCircleExclamation} /> {error}</p>
 
         </CardBody >
       </Card >
