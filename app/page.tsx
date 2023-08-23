@@ -4,7 +4,7 @@ import { PackageLock } from '@/utils/PackageLock'
 import { useState } from 'react'
 
 export default function Home() {
-  const [file, setFile] = useState<PackageLock>()
+  const [file, setFile] = useState<Zod.infer<typeof PackageLock>>()
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">

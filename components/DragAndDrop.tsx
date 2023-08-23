@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { ChangeEvent, Dispatch, DragEventHandler, SetStateAction, useRef, useState } from "react"
 import { Button, Card, CardBody, CardText, CardTitle } from "react-bootstrap"
 
-export default function DragAndDrop({ file, setFile }: { file: PackageLock | undefined, setFile: Dispatch<SetStateAction<PackageLock | undefined>> }) {
+export default function DragAndDrop({ file, setFile }: { file: Zod.infer<typeof PackageLock> | undefined, setFile: Dispatch<SetStateAction<Zod.infer<typeof PackageLock> | undefined>> }) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
   const [droppable, setDroppable] = useState(false)
@@ -27,12 +27,26 @@ export default function DragAndDrop({ file, setFile }: { file: PackageLock | und
     reader.onload = () => {
       if (!reader.result) return
 
+      let json
+
       try {
-        setError(undefined)
-        setFile(JSON.parse(reader.result.toString()))
+        json = JSON.parse(reader.result.toString())
       } catch (error) {
         setError("Couldn't parse the file, please make sure it is valid JSON")
       }
+
+      const result = PackageLock.safeParse(json)
+
+      if (!result.success) {
+        console.log(result.error.toString())
+        setError("Please make sure your package-lock file follows the standard of lockfile version 3")
+        return
+      }
+
+
+      setFile(result.data)
+      setError("")
+
     }
   }
 
