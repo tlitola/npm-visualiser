@@ -1,6 +1,7 @@
 "use client"
 
 import { PackageLock } from "@/utils/PackageLock"
+import { createDependencyTree } from "@/utils/parser"
 import { faFileArrowDown, faCircleExclamation } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { ChangeEvent, Dispatch, DragEventHandler, SetStateAction, useRef, useState } from "react"
@@ -43,6 +44,9 @@ export default function DragAndDrop({ file, setFile }: { file: Zod.infer<typeof 
         return
       }
 
+      createDependencyTree(result.data, "dependencies")
+      createDependencyTree(result.data, "devDependencies")
+      createDependencyTree(result.data, "peerDependencies")
 
       setFile(result.data)
       setError("")
