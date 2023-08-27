@@ -36,8 +36,7 @@ export const createDependencyTree = (
       ),
     })
   );
-
-  console.log(type, dependencies);
+  return dependencies;
 };
 
 const getDependency = (
