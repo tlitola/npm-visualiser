@@ -1,9 +1,10 @@
 "use client"
 
 import { NpmPackage, PackageLock } from "@/utils/PackageLock";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import DragAndDrop from "./DragAndDrop";
 import { createDependencyTree } from "@/utils/parser";
+import DependencyNode from "./DependencyNode";
 
 export default function DependencyTree() {
   const [dependencyTree, setDependencyTree] = useState<
@@ -19,10 +20,6 @@ export default function DependencyTree() {
   const setLoading = (loading: boolean) => {
     setDependencyTree(prev => ({ ...prev, isLoading: loading }))
   }
-
-  useEffect(() => {
-    console.log(dependencyTree)
-  }, [dependencyTree])
 
   const maybeSetFile = (newFile: File, setError: (error?: string) => void) => {
     if (newFile?.type !== "application/json") return
@@ -69,5 +66,10 @@ export default function DependencyTree() {
     }
   }
 
-  return (!dependencyTree.isSet ? <DragAndDrop disabled={dependencyTree.isSet || dependencyTree.isLoading} onFileChange={maybeSetFile} /> : <p>Foo</p>)
+  return (!dependencyTree.isSet
+    ? <DragAndDrop disabled={dependencyTree.isSet || dependencyTree.isLoading} onFileChange={maybeSetFile} />
+    : <section className="flex flex-col items-start min-w-full">
+      {dependencyTree.tree.map(el => <DependencyNode dependency={el} depth={1} key={`${el.name}-${el.version}`} />)}
+    </section>
+  )
 }
