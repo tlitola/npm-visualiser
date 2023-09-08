@@ -4,7 +4,7 @@ import { faFileArrowDown, faCircleExclamation } from "@fortawesome/free-solid-sv
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { ChangeEvent, DragEventHandler, useRef, useState } from "react"
 import { Button, Card, CardBody, CardText, CardTitle } from "react-bootstrap"
-export default function DragAndDrop({ onFileChange, disabled }: { disabled: boolean; onFileChange: (file: File, setError: (error?: string) => void) => void }) {
+export default function DragAndDrop({ onFileChange, disabled }: { disabled: boolean; onFileChange: (file: File, setError: (error?: string) => void) => void; }) {
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)

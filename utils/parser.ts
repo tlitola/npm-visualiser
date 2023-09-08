@@ -9,7 +9,15 @@ import omit from "lodash.omit";
 
 export const createDependencyTree = (
   lockfile: PackageLock,
-  type: "dependencies" | "devDependencies" | "peerDependencies" = "dependencies"
+  type:
+    | "dependencies"
+    | "devDependencies"
+    | "peerDependencies" = "dependencies",
+  updateStatus?: (
+    dependencyNumber: number,
+    name: string,
+    subPackageName?: string
+  ) => void
 ) => {
   let dependencyList;
 
@@ -26,15 +34,18 @@ export const createDependencyTree = (
   }
 
   const dependencies: NpmPackage[] = Object.keys(dependencyList).map(
-    (packageName) => ({
-      name: packageName,
-      ...findDependencies(
-        lockfile,
-        "node_modules" + "/" + packageName,
-        lockfile.packages["node_modules/" + packageName],
-        [packageName]
-      ),
-    })
+    (packageName, i) => {
+      updateStatus && updateStatus(i + 1, packageName);
+      return {
+        name: packageName,
+        ...findDependencies(
+          lockfile,
+          "node_modules" + "/" + packageName,
+          lockfile.packages["node_modules/" + packageName],
+          [packageName]
+        ),
+      };
+    }
   );
   return dependencies;
 };
