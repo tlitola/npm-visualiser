@@ -46,7 +46,7 @@ export const PackageLock = z.object({
         //There doesn't seem to be a way to merge z.object and z.record without the rules of the latter affecting the first one
         //Version should be optional with key "" but required otherwise, hence offer default if the version is missing
         version: z.string().default("undefined"),
-        dependencies: z.record(z.string()),
+        dependencies: z.record(z.string()).optional(),
         devDependencies: z.record(z.string()).optional(),
         peerDependencies: z.record(z.string()).optional(),
       }),

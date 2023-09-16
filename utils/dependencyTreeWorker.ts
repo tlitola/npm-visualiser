@@ -1,23 +1,17 @@
+import { z } from "zod";
 import { PackageLock } from "./PackageLock";
-import { createDependencyTree } from "./parser";
+import { createDependencyTree } from "./dependencyTreeParser";
 
 self.onmessage = async (e: MessageEvent<[string, any]>) => {
   switch (e.data[0]) {
     case "generate":
-      const result = PackageLock.safeParse(e.data[1]);
-
-      if (!result.success) {
-        console.log(result.error.toString());
-        throw new Error(
-          "Please make sure your package-lock file follows the standard of lockfile version 3"
-        );
-      }
+      const result = e.data[1] as z.infer<typeof PackageLock>;
 
       const dependencyCount = Object.keys(
-        result.data.packages[""].dependencies
+        result.packages[""].dependencies ?? {}
       ).length;
       const tree = createDependencyTree(
-        result.data,
+        result,
         "dependencies",
         (dependencyNumber, dependencyName) => {
           self.postMessage([
@@ -35,10 +29,10 @@ self.onmessage = async (e: MessageEvent<[string, any]>) => {
       await new Promise((resolve) => setTimeout(() => resolve(""), 1000));
 
       const devDependencyCount = Object.keys(
-        result.data.packages[""].devDependencies ?? {}
+        result.packages[""].devDependencies ?? {}
       ).length;
       const devTree = createDependencyTree(
-        result.data,
+        result,
         "devDependencies",
         (dependencyNumber, dependencyName) => {
           self.postMessage([
@@ -56,10 +50,10 @@ self.onmessage = async (e: MessageEvent<[string, any]>) => {
       await new Promise((resolve) => setTimeout(() => resolve(""), 1000));
 
       const peerDependencyCount = Object.keys(
-        result.data.packages[""].peerDependencies ?? {}
+        result.packages[""].peerDependencies ?? {}
       ).length;
       const peerTree = createDependencyTree(
-        result.data,
+        result,
         "peerDependencies",
         (dependencyNumber, dependencyName) => {
           self.postMessage([

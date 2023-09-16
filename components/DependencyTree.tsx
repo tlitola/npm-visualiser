@@ -1,11 +1,12 @@
 "use client"
 
-import { NpmPackage, PackageLock, npmPackage } from "@/utils/PackageLock";
+import { NpmPackage, npmPackage } from "@/utils/PackageLock";
 import { useState } from "react";
 import DragAndDrop from "./DragAndDrop";
 import DependencyNode from "./DependencyNode";
 import Loading from "./Loading";
 import { z } from "zod";
+import { readLockFile } from "@/utils/parser";
 
 export default function DependencyTree() {
   const [dependencyTree, setDependencyTree] = useState<
@@ -24,66 +25,35 @@ export default function DependencyTree() {
     setDependencyTree(prev => ({ ...prev, isLoading: loading }))
   }
 
-  const maybeSetFile = (newFile: File, setError: (error?: string) => void) => {
-    if (newFile?.type !== "application/json") return
-    setLoading(true)
+  const updateDependencyTree = async (newFile: File, setError: (error?: string) => void) => {
 
-    const reader = new FileReader()
-    reader.readAsText(newFile)
-    reader.onerror = () => setError(reader.error?.message)
+    const handleZodParseError = (data: z.SafeParseError<any>) => {
+      console.log(data.error.toString())
+      setError("Something went wrong, please try again")
+      setLoading(false)
+    }
 
-    reader.onload = () => {
-      if (!reader.result) return
+    try {
+      //Parse file
+      const lockFile = await readLockFile(newFile, (status) => { setLoading(status) })
 
-      let json
-
-      try {
-        json = JSON.parse(reader.result.toString())
-      } catch (error) {
-        setError("Couldn't parse the file, please make sure it is valid JSON")
-        setLoading(false)
-      }
-
-      const result = PackageLock.safeParse(json)
-
-      if (!result.success) {
-        console.log(result.error.toString())
-        setError("Please make sure your package-lock file follows the standard of lockfile version 3")
-        setLoading(false)
-        return
-      }
-
-      const steps = ["Dependencies"]
-
-      result.data.packages[""].devDependencies && steps.push("Dev\nDependencies")
-      result.data.packages[""].peerDependencies && steps.push("Peer\nDependencies")
-
-
+      //Update loading status
+      const steps = []
+      lockFile.packages[""].dependencies && steps.push("Dependencies")
+      lockFile.packages[""].devDependencies && steps.push("Dev\nDependencies")
+      lockFile.packages[""].peerDependencies && steps.push("Peer\nDependencies")
       setLoadingStatus({ step: 0, now: 0, message: "", steps })
 
+      //Create web worker to parse the file
       const worker = new Worker(new URL("../utils/dependencyTreeWorker.ts", import.meta.url))
-
       if (window.Worker) {
-        worker.postMessage(["generate", result.data]);
-        worker.onerror = (e) => {
-          setError(e.message)
-          setLoading(false)
-        }
+        worker.postMessage(["generate", lockFile]);
+        worker.onerror = (e) => { setError(e.message); setLoading(false) }
 
         worker.onmessage = (e: MessageEvent<[string, any]>) => {
-
           switch (e.data[0]) {
             case "complete":
-              const messageData = z.tuple([z.array(npmPackage), z.array(npmPackage), z.array(npmPackage)]).safeParse(e.data[1])
-
-              if (!messageData.success) {
-                console.log(messageData.error.toString())
-                setError("Something went wrong, please try again")
-                setLoading(false)
-                return
-              }
-
-              const [tree, devTree, peerTree] = messageData.data
+              const [tree, devTree, peerTree] = e.data[1]
 
               setLoadingStatus(prev => ({
                 step: prev.step + 1,
@@ -102,17 +72,15 @@ export default function DependencyTree() {
                 })
                 setError("")
               }, 1000);
+
+              worker.terminate()
               break;
 
             case "loadingStatus":
               const loadingData = z.tuple([z.number(), z.number(), z.string()]).safeParse(e.data[1])
 
-              if (!loadingData.success) {
-                console.log(loadingData.error.toString())
-                setError("Something went wrong, please try again")
-                setLoading(false)
-                return
-              }
+              if (!loadingData.success) { handleZodParseError(loadingData); return }
+
               const [step, now, message] = loadingData.data
 
               setLoadingStatus(prev => ({
@@ -127,16 +95,28 @@ export default function DependencyTree() {
           }
         }
       }
+    } catch (error) {
+      setLoading(false)
+      if (error instanceof Error) setError(error.message)
     }
   }
+
 
   return (
     dependencyTree.isLoading
       ? <Loading statusText={loadingStatus.message} step={loadingStatus.step} now={loadingStatus.now} steps={loadingStatus.steps} />
       : dependencyTree.isSet ?
-        <section className="flex flex-col items-start min-w-full">
-          {dependencyTree.tree.map(el => <DependencyNode dependency={el} depth={1} key={`${el.name}-${el.version}`} />)}
-        </section>
-        : <DragAndDrop disabled={dependencyTree.isSet || dependencyTree.isLoading} onFileChange={maybeSetFile} />
+        <div>
+          <section className="flex flex-col items-start min-w-full">
+            {dependencyTree.tree.map(el => <DependencyNode dependency={el} depth={1} key={`${el.name}-${el.version}`} />)}
+          </section>
+          <section className="flex flex-col items-start min-w-full bg-emerald-100">
+            {dependencyTree.devTree.map(el => <DependencyNode dependency={el} depth={1} key={`${el.name}-${el.version}`} />)}
+          </section>
+          <section className="flex flex-col items-start min-w-full bg-cyan-100">
+            {dependencyTree.peerTree.map(el => <DependencyNode dependency={el} depth={1} key={`${el.name}-${el.version}`} />)}
+          </section>
+        </div>
+        : <DragAndDrop disabled={dependencyTree.isSet || dependencyTree.isLoading} onFileChange={updateDependencyTree} />
   )
 }

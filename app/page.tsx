@@ -1,5 +1,4 @@
 import DependencyTree from '@/components/DependencyTree'
-import DragAndDrop from '@/components/DragAndDrop'
 
 export default function Home() {
 

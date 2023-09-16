@@ -1,139 +1,37 @@
-import {
-  LockFilePackage,
-  NpmPackage,
-  PackageLock,
-  npmPackage,
-} from "./PackageLock";
+import { z } from "zod";
+import { PackageLock } from "./PackageLock";
 
-import omit from "lodash.omit";
+export const readLockFile = async (
+  file: File,
+  updateLoadingStatus?: (status: boolean) => void
+): Promise<z.infer<typeof PackageLock>> => {
+  if (file?.type !== "application/json")
+    throw new Error(
+      "Couldn't parse the file, please make sure it is valid JSON"
+    );
+  updateLoadingStatus && updateLoadingStatus(true);
 
-export const createDependencyTree = (
-  lockfile: PackageLock,
-  type:
-    | "dependencies"
-    | "devDependencies"
-    | "peerDependencies" = "dependencies",
-  updateStatus?: (
-    dependencyNumber: number,
-    name: string,
-    subPackageName?: string
-  ) => void
-) => {
-  let dependencyList;
+  const text = await file.text();
 
-  switch (type) {
-    case "dependencies":
-      dependencyList = lockfile.packages[""].dependencies;
-      break;
-    case "devDependencies":
-      dependencyList = lockfile.packages[""].devDependencies ?? {};
-      break;
-    case "peerDependencies":
-      dependencyList = lockfile.packages[""].peerDependencies ?? {};
-      break;
+  let json;
+  try {
+    json = JSON.parse(text);
+  } catch (error) {
+    updateLoadingStatus && updateLoadingStatus(false);
+    throw new Error(
+      "Couldn't parse the file, please make sure it is valid JSON"
+    );
   }
 
-  const dependencies: NpmPackage[] = Object.keys(dependencyList).map(
-    (packageName, i) => {
-      updateStatus && updateStatus(i + 1, packageName);
-      return {
-        name: packageName,
-        ...findDependencies(
-          lockfile,
-          "node_modules" + "/" + packageName,
-          lockfile.packages["node_modules/" + packageName],
-          [packageName]
-        ),
-      };
-    }
-  );
-  return dependencies;
-};
+  const result = PackageLock.safeParse(json);
 
-const getDependency = (
-  lockfile: PackageLock,
-  path: string,
-  dependency: string
-) => {
-  if (Object.hasOwn(lockfile.packages, path + "/node_modules/" + dependency)) {
-    return lockfile.packages[path + "/node_modules/" + dependency];
+  if (!result.success) {
+    console.log(result.error.toString());
+    updateLoadingStatus && updateLoadingStatus(false);
+    throw new Error(
+      "Please make sure your package-lock file follows the standard of lockfile version 3"
+    );
   }
-  return lockfile.packages["node_modules/" + dependency];
-};
 
-const getPath = (lockfile: PackageLock, path: string, dependency: string) => {
-  if (Object.hasOwn(lockfile.packages, path + "/node_modules/" + dependency)) {
-    return path + "/node_modules/" + dependency;
-  }
-  return "node_modules/" + dependency;
-};
-
-const findDependencies = (
-  lockfile: PackageLock,
-  path: string,
-  dependency: LockFilePackage,
-  stack: string[]
-): NpmPackage => {
-  const new_dependency = npmPackage.parse(
-    omit(dependency, ["dependencies", "peerDependencies"])
-  );
-
-  const dependencies = Object.keys(dependency.dependencies ?? {}).map(
-    (dependencyName) => {
-      if (stack.includes(dependencyName))
-        return {
-          name: dependencyName,
-          cyclic: true,
-          ...npmPackage.parse(
-            omit(getDependency(lockfile, path, dependencyName), [
-              "dependencies",
-              "peerDependencies",
-            ])
-          ),
-        };
-
-      return {
-        name: dependencyName,
-        ...findDependencies(
-          lockfile,
-          getPath(lockfile, path, dependencyName),
-          getDependency(lockfile, path, dependencyName),
-          [...stack, dependencyName]
-        ),
-      };
-    }
-  );
-
-  const peerDependencies = Object.keys(dependency.peerDependencies ?? {})
-    .filter((name) =>
-      Object.hasOwn(lockfile.packages, getPath(lockfile, path, name))
-    )
-    .map((dependencyName) => {
-      if (stack.includes(dependencyName))
-        return {
-          name: dependencyName,
-          cyclic: true,
-          ...npmPackage.parse(
-            omit(getDependency(lockfile, path, dependencyName), [
-              "dependencies",
-              "peerDependencies",
-            ])
-          ),
-        };
-
-      return {
-        name: dependencyName,
-        ...findDependencies(
-          lockfile,
-          getPath(lockfile, path, dependencyName),
-          getDependency(lockfile, path, dependencyName),
-          [...stack, dependencyName]
-        ),
-      };
-    });
-
-  new_dependency["dependencies"] = dependencies;
-  new_dependency["peerDependencies"] = peerDependencies;
-
-  return new_dependency;
+  return result.data;
 };
