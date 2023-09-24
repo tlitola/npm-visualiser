@@ -5,7 +5,7 @@ import { ProgressBar } from "react-bootstrap";
 export default function Loading({ statusText, steps, step, now }: { statusText?: string, steps: string[], step: number, now: number }) {
 
   return (
-    <div className="w-full">
+    <div className="w-full px-20 py-10">
       <div className="flex items-center w-full">
         {steps.map((el, i) => <Step label={el} now={i > step ? 0 : step === i ? now : 100} key={el} done={now > 100 || step > i} />)}
       </div>
