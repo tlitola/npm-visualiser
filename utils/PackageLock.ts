@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+export const projectInfo = z.object({
+  name: z.string(),
+  version: z.string().optional(),
+});
+
+export type ProjectInfo = z.infer<typeof projectInfo>;
+
 //Zod schemas for handling package tree
 const basePackage = z
   .object({
@@ -36,6 +43,7 @@ export type LockFilePackage = z.infer<typeof lockFilePackage>;
 
 export const PackageLock = z.object({
   name: z.string(),
+  author: z.string().optional(),
   version: z.string().optional(),
   lockfileVersion: z.number(),
   requires: z.boolean().optional(),

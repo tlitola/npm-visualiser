@@ -3,7 +3,7 @@ import DependencyTree from '@/components/DependencyTree'
 export default function Home() {
 
   return (
-    <main className="flex min-h-screen flex-col px-4 py-16">
+    <main className="flex h-screen flex-col px-4 py-16">
       <DependencyTree />
     </main>
   )

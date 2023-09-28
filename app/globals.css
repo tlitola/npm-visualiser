@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.bg-emerald {
+  --bs-bg-opacity: 1;
+  background: rgba(16 185 129 / var(--bs-bg-opacity)) !important;
+}
+
+.bg-light-gray {
+  --bs-bg-opacity: 1;
+  background: rgba(156 163 175 / var(--bs-bg-opacity)) !important;
+}

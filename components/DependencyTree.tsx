@@ -1,13 +1,14 @@
 "use client"
 
-import { NpmPackage, npmPackage } from "@/utils/PackageLock";
+import { NpmPackage, ProjectInfo } from "@/utils/PackageLock";
 import { useState } from "react";
 import DragAndDrop from "./DragAndDrop";
 import DependencyNode from "./DependencyNode";
 import Loading from "./Loading";
 import { z } from "zod";
 import { readLockFile } from "@/utils/parser";
-import { Tab, Tabs } from "react-bootstrap";
+import { Card, Col, Row, Stack, Tab, Tabs } from "react-bootstrap";
+import Tag from "./Tag";
 
 export default function DependencyTree() {
   const [dependencyTree, setDependencyTree] = useState<
@@ -18,6 +19,8 @@ export default function DependencyTree() {
       peerTree: NpmPackage[]
     }
   >({ isSet: false, tree: [], devTree: [], peerTree: [] })
+
+  const [project, setProject] = useState<ProjectInfo>()
 
   const [loadingStatus, setLoadingStatus] = useState<{ isLoading: boolean; step: number; now: number; message: string, steps: string[] }>({ isLoading: false, step: 0, now: 0, message: "", steps: [] })
 
@@ -36,6 +39,10 @@ export default function DependencyTree() {
     try {
       //Parse file
       const lockFile = await readLockFile(newFile, (status) => { setLoading(status) })
+
+      setProject({ name: lockFile.name, version: lockFile.version })
+
+
 
       //Update loading status
       const steps = []
@@ -107,33 +114,61 @@ export default function DependencyTree() {
       ? <Loading statusText={loadingStatus.message} step={loadingStatus.step} now={loadingStatus.now} steps={loadingStatus.steps} />
       : dependencyTree.isSet ?
         <>
-          <Tabs defaultActiveKey={"dependencies"}>
-            <Tab eventKey={"dependencies"}
-              title={<p title={dependencyTree.tree.length === 0 ? "Lockfile provided does not contain any dependencies" : ""} className={`m-0 ${dependencyTree.tree.length === 0 && "text-gray-500"}`}>Dependencies</p>}
-            >
-              {dependencyTree.tree.length === 0 && <p className="text-center pt-1">Lockfile provided does not contain any dependencies</p>}
-              <section className="flex flex-col items-start min-w-full px-2 pt-1">
-                {dependencyTree.tree.map(el => <DependencyNode parents={{}} dependency={el} depth={1} key={`${el.name}-${el.version}`} />)}
-              </section>
-            </Tab>
-            <Tab eventKey={"devDependencies"}
-              title={<p title={dependencyTree.devTree.length === 0 ? "Lockfile provided does not contain any dev dependencies" : ""} className={`m-0 ${dependencyTree.devTree.length === 0 && "text-gray-500"}`}>Dev Dependencies</p>}
-            >
-              {dependencyTree.devTree.length === 0 && <p className="text-center pt-1">Lockfile provided does not contain any dev dependencies</p>}
-              <section className="flex flex-col items-start min-w-full pt-1">
-                {dependencyTree.devTree.map(el => <DependencyNode parents={{}} dependency={el} depth={1} key={`${el.name}-${el.version}`} />)}
-              </section>
-            </Tab>
-            <Tab eventKey={"peerDependencies"}
-              title={<p title={dependencyTree.peerTree.length === 0 ? "Lockfile provided does not contain any peer dependencies" : ""} className={`m-0 ${dependencyTree.peerTree.length === 0 && "text-gray-500"}`}>Peer Dependencies</p>}
-            >
-              {dependencyTree.peerTree.length === 0 && <p className="text-center pt-1">Lockfile provided does not contain any peer dependencies</p>}
-              <section className="flex flex-col items-start min-w-full pt-1">
-                {dependencyTree.peerTree.map(el => <DependencyNode parents={{}} dependency={el} depth={1} key={`${el.name}-${el.version}`} />)}
-              </section>
+          <Row className="mb-4">
+            <Col>
+              <Stack direction="horizontal" className="mb-1"><h1 className="my-auto mr-4">{project?.name}</h1>{project?.version && <Tag className="px-2 py-1  !text-base" type="version" version={project?.version} />}</Stack>
+              <h4>Something</h4>
+            </Col>
 
-            </Tab>
-          </Tabs >
+            <Col>
+              <Stack className="justify-end" direction="horizontal" gap={4}>
+                <Card className="!h-32 !w-32 py-2" title="23 dependencies, 10 dev dependencies and 2 peer dependencies">
+                  <Card.Title className="!text-base text-center font-normal mb-0">Dependencies</Card.Title>
+                  <Card.Body className="text-center font-bold">{dependencyTree.tree.length + dependencyTree.devTree.length + dependencyTree.peerTree.length}</Card.Body>
+                  <Card.Footer className="font-light text-sm text-center">{`${dependencyTree.tree.length} / ${dependencyTree.devTree.length} / ${dependencyTree.peerTree.length}`}</Card.Footer>
+                </Card>
+                <Card className="!h-32 !w-32 py-2" title="There are currently 0 high, 1 medium, and 0 low severity vulnerabilites">
+                  <Card.Title className="!text-base text-center font-normal mb-0">Vulnerabilities</Card.Title>
+                  <Card.Body className="text-center font-bold">1</Card.Body>
+                  <Card.Footer className="font-light text-sm text-center">Medium</Card.Footer>
+                </Card>
+                <Card className="!h-32 !w-32 py-2" title="Size of all dependencies combined">
+                  <Card.Title className="!text-base text-center font-normal mb-0">Total size</Card.Title>
+                  <Card.Body className="text-center font-bold">53,78KB</Card.Body>
+                  <Card.Footer className="font-light text-sm text-center">Unpacked</Card.Footer>
+                </Card>
+              </Stack>
+            </Col>
+          </Row>
+          <Row className="h-full overflow-scroll p-2 py-0 rounded-sm shadow content-start">
+            <Tabs defaultActiveKey={"dependencies"} className="sticky top-0 bg-white h-fit">
+              <Tab eventKey={"dependencies"}
+                title={<p title={dependencyTree.tree.length === 0 ? "Lockfile provided does not contain any dependencies" : ""} className={`m-0 ${dependencyTree.tree.length === 0 && "text-gray-500"}`}>Dependencies</p>}
+              >
+                {dependencyTree.tree.length === 0 && <p className="text-center pt-1">Lockfile provided does not contain any dependencies</p>}
+                <section className="flex flex-col items-start min-w-full px-2 pt-1">
+                  {dependencyTree.tree.map(el => <DependencyNode parents={{}} dependency={el} depth={1} key={`${el.name}-${el.version}`} />)}
+                </section>
+              </Tab>
+              <Tab eventKey={"devDependencies"}
+                title={<p title={dependencyTree.devTree.length === 0 ? "Lockfile provided does not contain any dev dependencies" : ""} className={`m-0 ${dependencyTree.devTree.length === 0 && "text-gray-500"}`}>Dev Dependencies</p>}
+              >
+                {dependencyTree.devTree.length === 0 && <p className="text-center pt-1">Lockfile provided does not contain any dev dependencies</p>}
+                <section className="flex flex-col items-start min-w-full pt-1">
+                  {dependencyTree.devTree.map(el => <DependencyNode parents={{}} dependency={el} depth={1} key={`${el.name}-${el.version}`} />)}
+                </section>
+              </Tab>
+              <Tab eventKey={"peerDependencies"}
+                title={<p title={dependencyTree.peerTree.length === 0 ? "Lockfile provided does not contain any peer dependencies" : ""} className={`m-0 ${dependencyTree.peerTree.length === 0 && "text-gray-500"}`}>Peer Dependencies</p>}
+              >
+                {dependencyTree.peerTree.length === 0 && <p className="text-center pt-1">Lockfile provided does not contain any peer dependencies</p>}
+                <section className="flex flex-col items-start min-w-full pt-1">
+                  {dependencyTree.peerTree.map(el => <DependencyNode parents={{}} dependency={el} depth={1} key={`${el.name}-${el.version}`} />)}
+                </section>
+
+              </Tab>
+            </Tabs >
+          </Row>
         </>
 
         : <DragAndDrop disabled={dependencyTree.isSet || loadingStatus.isLoading} onFileChange={updateDependencyTree} />

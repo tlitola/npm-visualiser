@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import Link from "next/link"
 import { useRef, useState } from "react"
 import Tag from "./Tag"
+import { Stack } from "react-bootstrap"
 
 const baseLink = "https://www.npmjs.com/package/"
 
@@ -27,10 +28,16 @@ export default function DependencyNode({ dependency, depth, parents }: { depende
   return (
     <>
       <span className="flex items-center m-1" ref={nodeRef}>
-        <Link href={`${baseLink}${dependency.name}`} target="_blank" className="m-0 text-black no-underline">{dependency.name} - {dependency.version}</Link>
+        <Link href={`${baseLink}${dependency.name}`} target="_blank" className="!mr-2 my-0 ml-0 text-black no-underline">{dependency.name}</Link>
+
+        <Stack direction="horizontal" className="m-auto" gap={2}>
+          <Tag type="version" version={dependency.version ?? ""} />
+          {dependency.cyclic && <Tag type="circular" onClick={() => { parents[`${dependency.name}-${dependency.version}`]() }} />}
+        </Stack>
+
         {((!dependency.dependencies || dependency.dependencies?.length > 0) && !dependency.cyclic) &&
           <FontAwesomeIcon className="ml-3 select-none text-gray-500 hover:text-black" role="button" onClick={() => setShow(prev => !prev)} icon={show ? faCaretUp : faCaretDown} />}
-        {dependency.cyclic && <Tag type="circular" onClick={() => { parents[`${dependency.name}-${dependency.version}`]() }} />}
+
       </span>
       {
         show && dependency.dependencies &&
