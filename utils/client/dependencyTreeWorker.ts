@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PackageLock } from "./PackageLock";
+import { PackageLock } from "../PackageLock";
 import { createDependencyTree } from "./dependencyTreeParser";
 
 self.onmessage = async (e: MessageEvent<[string, any]>) => {

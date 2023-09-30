@@ -3,7 +3,7 @@ import {
   NpmPackage,
   PackageLock,
   npmPackage,
-} from "./PackageLock";
+} from "../PackageLock";
 
 import omit from "lodash.omit";
 

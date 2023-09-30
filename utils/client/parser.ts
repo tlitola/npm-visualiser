@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PackageLock } from "./PackageLock";
+import { PackageLock } from "../PackageLock";
 
 export const readLockFile = async (
   file: File,

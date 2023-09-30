@@ -37,7 +37,7 @@ export default function DragAndDrop({ onFileChange, disabled }: { disabled: bool
 
   return (
     <>
-      <div className={`${!dragging && "opacity-0"} transition-all  bg-black h-screen w-screen fixed top-0 left-0 opacity-20 ${droppable && "opacity-10"}`} onDragEnter={startWindowDrag} onDrop={stopWindowDrag} onDragOver={startWindowDrag} onDragLeave={stopWindowDrag} />
+      <div className={`${!dragging && "opacity-0"} z-0 transition-all  bg-black h-screen w-screen fixed top-0 left-0 opacity-20 ${droppable && "opacity-10"}`} onDragEnter={startWindowDrag} onDrop={stopWindowDrag} onDragOver={startWindowDrag} onDragLeave={stopWindowDrag} />
       <Card bg={`${(!droppable && !error) && "light"}`} border={`${error ? "danger" : !droppable ? "secondary" : "info"}`} className={`mx-auto w-3/5 ${error ? "!bg-rose-100" : "!bg-blue-100"} border-2 ${!droppable && "!border-dashed"} transition-all box-border`} onDragEnter={startDrag} onDragLeave={stopDrag} onDrop={handleDrop} onDragOver={(e) => { startDrag(e); startWindowDrag(e) }}>
 
         <CardBody className='text-center !space-y-3'>
