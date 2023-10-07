@@ -24,19 +24,18 @@ const basePackage = z
 export type NpmPackage = z.infer<typeof basePackage> & {
   dependencies?: NpmPackage[];
   devDependencies?: NpmPackage[];
-  peerDependencies?: NpmPackage[];
+  totalDependencies: number;
 };
 
 export const npmPackage: z.ZodType<NpmPackage> = basePackage.extend({
   dependencies: z.lazy(() => npmPackage.array()).optional(),
   devDependencies: z.lazy(() => npmPackage.array()).optional(),
-  peerDependencies: z.lazy(() => npmPackage.array()).optional(),
+  totalDependencies: z.number(),
 });
 
 //Zod schema for reading package-lock.json file
 export const lockFilePackage = basePackage.extend({
   dependencies: z.record(z.string(), z.string()).optional(),
-  peerDependencies: z.record(z.string(), z.string()).optional(),
 });
 
 export type LockFilePackage = z.infer<typeof lockFilePackage>;
@@ -56,7 +55,6 @@ export const PackageLock = z.object({
         version: z.string().default("undefined"),
         dependencies: z.record(z.string()).optional(),
         devDependencies: z.record(z.string()).optional(),
-        peerDependencies: z.record(z.string()).optional(),
       }),
     })
     .and(z.record(lockFilePackage)),

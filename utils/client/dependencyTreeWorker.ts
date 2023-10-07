@@ -49,25 +49,10 @@ self.onmessage = async (e: MessageEvent<[string, any]>) => {
       //Rest to allow the loading animation time to catch up
       await new Promise((resolve) => setTimeout(() => resolve(""), 1000));
 
-      const peerDependencyCount = Object.keys(
-        result.packages[""].peerDependencies ?? {}
-      ).length;
-      const peerTree = createDependencyTree(
-        result,
-        "peerDependencies",
-        (dependencyNumber, dependencyName) => {
-          self.postMessage([
-            "loadingStatus",
-            [
-              2,
-              (dependencyNumber / peerDependencyCount) * 100,
-              `${dependencyNumber}/${peerDependencyCount}: ${dependencyName}`,
-            ],
-          ]);
-        }
-      );
-
-      self.postMessage(["complete", [tree, devTree, peerTree]]);
+      self.postMessage([
+        "complete",
+        [tree, devTree, Object.keys(result.packages).length - 1],
+      ]);
       break;
 
     default:

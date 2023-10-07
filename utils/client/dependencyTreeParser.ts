@@ -9,10 +9,7 @@ import omit from "lodash.omit";
 
 export const createDependencyTree = (
   lockfile: PackageLock,
-  type:
-    | "dependencies"
-    | "devDependencies"
-    | "peerDependencies" = "dependencies",
+  type: "dependencies" | "devDependencies" = "dependencies",
   updateStatus?: (
     dependencyNumber: number,
     name: string,
@@ -27,9 +24,6 @@ export const createDependencyTree = (
       break;
     case "devDependencies":
       dependencyList = lockfile.packages[""].devDependencies ?? {};
-      break;
-    case "peerDependencies":
-      dependencyList = lockfile.packages[""].peerDependencies ?? {};
       break;
   }
 
@@ -83,7 +77,7 @@ const findDependencies = (
   }
 
   const new_dependency = npmPackage.parse(
-    omit({ ...dependency, name }, ["dependencies", "peerDependencies"])
+    omit({ ...dependency, name, totalDependencies: 0 }, ["dependencies"])
   );
 
   const dependencies = Object.keys(dependency.dependencies ?? {}).map(
@@ -93,10 +87,13 @@ const findDependencies = (
           name: dependencyName,
           cyclic: true,
           ...npmPackage.parse(
-            omit(getDependency(lockfile, path, dependencyName), [
-              "dependencies",
-              "peerDependencies",
-            ])
+            omit(
+              {
+                ...getDependency(lockfile, path, dependencyName),
+                totalDependencies: 0,
+              },
+              ["dependencies"]
+            )
           ),
         };
 
@@ -114,40 +111,20 @@ const findDependencies = (
     }
   );
 
-  const peerDependencies = Object.keys(dependency.peerDependencies ?? {})
-    .filter((name) =>
-      Object.hasOwn(lockfile.packages, getPath(lockfile, path, name))
-    )
-    .map((dependencyName) => {
-      if (stack.includes(dependencyName))
-        return {
-          name: dependencyName,
-          cyclic: true,
-          ...npmPackage.parse(
-            omit(getDependency(lockfile, path, dependencyName), [
-              "dependencies",
-              "peerDependencies",
-            ])
-          ),
-        };
-
-      return {
-        name: dependencyName,
-        ...findDependencies(
-          lockfile,
-          getPath(lockfile, path, dependencyName),
-          getDependency(lockfile, path, dependencyName),
-          dependencyName,
-          [...stack, dependencyName],
-          dp
-        ),
-      };
-    });
-
   new_dependency["dependencies"] = dependencies;
-  new_dependency["peerDependencies"] = peerDependencies;
+  new_dependency["totalDependencies"] =
+    calculateFullDependencyCount(new_dependency);
 
   dp.set(`${new_dependency.name}-${new_dependency.version}`, new_dependency);
 
   return new_dependency;
+};
+
+const calculateFullDependencyCount = (dependency: NpmPackage) => {
+  return (
+    (dependency.dependencies?.reduce(
+      (acc, el) => acc + (el.totalDependencies ?? 0),
+      0
+    ) ?? 0) + (dependency.dependencies?.length ?? 0)
+  );
 };

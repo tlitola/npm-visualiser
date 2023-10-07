@@ -1,9 +1,10 @@
 import pLimit, { LimitFunction } from "p-limit";
 import { z } from "zod";
-import { packageInfo } from "../Package";
+import { packageInfo, packageVulnerability } from "../Package";
 import { Cache } from "cache-manager";
 import { withCache } from "./cache";
 import { RedisStore } from "cache-manager-redis-yet";
+import { getVulnerabilityScore, getVulnerabilitySeverity } from "./utils";
 
 const npmPackageResponse = z.object({
   name: z.string(),
@@ -11,6 +12,8 @@ const npmPackageResponse = z.object({
   description: z.string().optional(),
   license: z.string().optional(),
   dist: z.object({ unpackedSize: z.number().optional() }),
+  homepage: z.string().optional(),
+  repository: z.object({ url: z.string() }).optional(),
 });
 
 const npmDownloadResponse = z.object({
@@ -18,6 +21,49 @@ const npmDownloadResponse = z.object({
   start: z.string(),
   end: z.string(),
   package: z.string(),
+});
+
+const osvVulnerabilityResponse = z.object({
+  vulns: z
+    .array(
+      z
+        .object({
+          id: z.string(),
+          summary: z.string(),
+          details: z.string(),
+          published: z.string(),
+          modified: z.string(),
+          references: z.array(
+            z.object({
+              type: z.string(),
+              url: z.string(),
+            })
+          ),
+          affected: z.array(
+            z.object({
+              package: z.object({
+                ecosystem: z.literal("npm"),
+              }),
+              ranges: z
+                .array(
+                  z.object({
+                    type: z.literal("SEMVER"),
+                    events: z.array(z.record(z.string(), z.string())),
+                  })
+                )
+                .optional(),
+            })
+          ),
+          severity: z.array(
+            z.object({
+              type: z.string(),
+              score: z.string(),
+            })
+          ),
+        })
+        .partial()
+    )
+    .optional(),
 });
 
 export default class PackageInfoFetcher {
@@ -59,7 +105,7 @@ export default class PackageInfoFetcher {
           `Fetching package downloads for ${packageName} from NPM...`
         );
         const result = await this.safelyFetchJson(
-          `https://api.npmjs.org/downloads/point/last-month/${packageName}`
+          `https://api.npmjs.org/downloads/point/last-week/${packageName}`
         );
 
         if (!result.ok) throw new Error(result.error);
@@ -68,6 +114,44 @@ export default class PackageInfoFetcher {
 
         if (!data.success)
           throw new Error(`Couldn't fetch package data for ${packageName}`);
+
+        return data.data;
+      },
+      1000 * 60 * 60
+    );
+  }
+
+  async fetchPackageVulnerabilities(packageName: string, version: string) {
+    return this.withCache(
+      `package-vulnerabilities-${packageName}-${version}`,
+      async () => {
+        console.log(
+          `Fetching package vulnerabilities for ${packageName} from OSV...`
+        );
+        const result = await this.safelyFetchJson(
+          `https://api.osv.dev/v1/query`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              version,
+              package: {
+                name: packageName,
+              },
+            }),
+          }
+        );
+
+        if (!result.ok) throw new Error(result.error);
+
+        const data = osvVulnerabilityResponse.safeParse(result.data);
+
+        if (!data.success) {
+          console.log(data.error);
+          throw new Error(`Couldn't fetch package data for ${packageName}`);
+        }
 
         return data.data;
       },
@@ -91,6 +175,8 @@ export default class PackageInfoFetcher {
         info.status === "fulfilled"
           ? info.value.dist.unpackedSize ?? 0
           : undefined,
+      repository:
+        info.status === "fulfilled" ? info.value.repository?.url : undefined,
     });
 
     if (!data.success)
@@ -99,10 +185,47 @@ export default class PackageInfoFetcher {
     return data.data;
   }
 
+  async getPackageVulnerabilities(packageName: string, version: string) {
+    const vulnerabilities = await this.fetchPackageVulnerabilities(
+      packageName,
+      version
+    );
+
+    const data = (vulnerabilities?.vulns ?? []).map((vuln) => {
+      const severityResult = vuln.severity?.find((el) =>
+        el.type?.includes("CVSS")
+      )?.score;
+
+      const severity = severityResult
+        ? {
+            score: getVulnerabilityScore(severityResult),
+            text: getVulnerabilitySeverity(severityResult),
+            vector: severityResult,
+          }
+        : undefined;
+
+      return packageVulnerability.parse({
+        name: packageName,
+        version,
+        ...vuln,
+        from: (((vuln.affected ?? [])[0].ranges ?? [])[0]?.events?.find((el) =>
+          Object.keys(el).includes("introduced")
+        ) ?? {})["introduced"],
+        to: (((vuln.affected ?? [])[0].ranges ?? [])[0]?.events?.find((el) =>
+          Object.keys(el).includes("fixed")
+        ) ?? {})["fixed"],
+        severity,
+      });
+    });
+
+    return data;
+  }
+
   async safelyFetchJson<T>(
-    url: string
+    url: string,
+    init?: RequestInit
   ): Promise<{ ok: false; error: string } | { ok: true; data: T }> {
-    const result = await this.limitedFetch(url);
+    const result = await this.limitedFetch(url, init);
 
     if (!result.ok)
       return {
@@ -118,8 +241,8 @@ export default class PackageInfoFetcher {
     }
   }
 
-  async limitedFetch(url: string) {
-    return await this.limiter(() => fetch(url));
+  async limitedFetch(url: string, init?: RequestInit) {
+    return await this.limiter(() => fetch(url, init));
   }
 
   async withCache<T>(
