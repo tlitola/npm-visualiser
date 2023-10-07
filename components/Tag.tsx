@@ -1,9 +1,5 @@
 import { CVSSThreadLevel } from "@/utils/client/utlis";
-import {
-  faCircleExclamation,
-  faRotateBack,
-  faWarning,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCircleExclamation, faRotateBack, faWarning } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ComponentPropsWithoutRef } from "react";
 import { Badge } from "react-bootstrap";

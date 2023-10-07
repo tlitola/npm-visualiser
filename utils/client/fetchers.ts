@@ -12,7 +12,7 @@ export const fetchAllPackagesInfo = async (packages: [string, string][]) => {
       const [name, version] = el;
 
       return { [`${name}@${version}`]: await fetchPackageInfo(name, version) };
-    })
+    }),
   );
 
   return result.reduce((acc, el) => {
@@ -20,20 +20,13 @@ export const fetchAllPackagesInfo = async (packages: [string, string][]) => {
   }, {});
 };
 
-export const fetchPackageVulnerabies = async (
-  name: string,
-  version: string
-) => {
-  const result = await fetch(
-    `/api/dependency/vulnerabilities/${name}/${version}`
-  );
+export const fetchPackageVulnerabies = async (name: string, version: string) => {
+  const result = await fetch(`/api/dependency/vulnerabilities/${name}/${version}`);
   const data = await result.json();
   return z.array(packageVulnerability).parse(data);
 };
 
-export const fetchAllPackagesVulnerabilites = async (
-  packages: [string, string][]
-) => {
+export const fetchAllPackagesVulnerabilites = async (packages: [string, string][]) => {
   const result = await Promise.all(
     packages.map(async (el) => {
       const [name, version] = el;
@@ -41,7 +34,7 @@ export const fetchAllPackagesVulnerabilites = async (
       return {
         [`${name}@${version}`]: await fetchPackageVulnerabies(name, version),
       };
-    })
+    }),
   );
 
   return result.reduce((acc, el) => {

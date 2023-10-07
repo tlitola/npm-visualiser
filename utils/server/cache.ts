@@ -29,7 +29,7 @@ export const withCache = async <T>(
   cache: Cache | RedisStore | undefined,
   key: string,
   func: () => Promise<T>,
-  ttl: number = 1000 * 60
+  ttl: number = 1000 * 60,
 ) => {
   if (!cache) return func();
 

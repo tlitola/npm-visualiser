@@ -8,10 +8,7 @@ import Loading from "../Loading";
 import { z } from "zod";
 import { readLockFile } from "@/utils/client/parser";
 import { Row, Tab, Tabs } from "react-bootstrap";
-import {
-  fetchAllPackagesInfo,
-  fetchAllPackagesVulnerabilites,
-} from "@/utils/client/fetchers";
+import { fetchAllPackagesInfo, fetchAllPackagesVulnerabilites } from "@/utils/client/fetchers";
 import { getPackageNameAndVersion } from "@/utils/client/utlis";
 import DependencyTree from "./DependencyTree";
 import DTPageHeader from "./DTPageHeader";
@@ -39,23 +36,19 @@ export default function DependencyTreePage() {
   const { data: packageInfo, error: packageInfoError } = useSWR(
     "packageInfo",
     () => fetchAllPackagesInfo(getPackageNameAndVersion(dependencyTree)),
-    { revalidateOnFocus: false }
+    { revalidateOnFocus: false },
   );
   const { data: vulns, error: packageVulnerabilityError } = useSWR(
     "packageVulnerability",
-    () =>
-      fetchAllPackagesVulnerabilites(getPackageNameAndVersion(dependencyTree)),
-    { revalidateOnFocus: false }
+    () => fetchAllPackagesVulnerabilites(getPackageNameAndVersion(dependencyTree)),
+    { revalidateOnFocus: false },
   );
 
   const setLoading = (loading: boolean) => {
     setLoadingStatus((prev) => ({ ...prev, isLoading: loading }));
   };
 
-  const updateDependencyTree = async (
-    newFile: File,
-    setError: (error?: string) => void
-  ) => {
+  const updateDependencyTree = async (newFile: File, setError: (error?: string) => void) => {
     const handleZodParseError = (data: z.SafeParseError<any>) => {
       console.log(data.error.toString());
       setError("Something went wrong, please try again");
@@ -83,9 +76,7 @@ export default function DependencyTreePage() {
       });
 
       //Create web worker to parse the file
-      const worker = new Worker(
-        new URL("../../utils/client/dependencyTreeWorker.ts", import.meta.url)
-      );
+      const worker = new Worker(new URL("../../utils/client/dependencyTreeWorker.ts", import.meta.url));
       if (window.Worker) {
         worker.postMessage(["generate", lockFile]);
         worker.onerror = (e) => {
@@ -96,11 +87,7 @@ export default function DependencyTreePage() {
         worker.onmessage = (e: MessageEvent<[string, any]>) => {
           switch (e.data[0]) {
             case "complete":
-              const [tree, devTree, count] = e.data[1] as [
-                NpmPackage[],
-                NpmPackage[],
-                number
-              ];
+              const [tree, devTree, count] = e.data[1] as [NpmPackage[], NpmPackage[], number];
 
               setLoadingStatus((prev) => ({
                 ...prev,
@@ -120,17 +107,11 @@ export default function DependencyTreePage() {
                 setError("");
                 mutate(
                   "packageInfo",
-                  async () =>
-                    await fetchAllPackagesInfo(
-                      getPackageNameAndVersion({ tree, devTree })
-                    )
+                  async () => await fetchAllPackagesInfo(getPackageNameAndVersion({ tree, devTree })),
                 );
                 mutate(
                   "packageVulnerability",
-                  async () =>
-                    await fetchAllPackagesVulnerabilites(
-                      getPackageNameAndVersion({ tree, devTree })
-                    )
+                  async () => await fetchAllPackagesVulnerabilites(getPackageNameAndVersion({ tree, devTree })),
                 );
               }, 1000);
 
@@ -139,9 +120,7 @@ export default function DependencyTreePage() {
               break;
 
             case "loadingStatus":
-              const loadingData = z
-                .tuple([z.number(), z.number(), z.string()])
-                .safeParse(e.data[1]);
+              const loadingData = z.tuple([z.number(), z.number(), z.string()]).safeParse(e.data[1]);
               if (!loadingData.success) {
                 handleZodParseError(loadingData);
                 return;
@@ -179,22 +158,13 @@ export default function DependencyTreePage() {
         project={project}
       />
       <Row className="h-full overflow-y-scroll p-2 py-0 rounded-sm shadow content-start scroll-pt-24 scroll-smooth">
-        <Tabs
-          defaultActiveKey={"dependencies"}
-          className="sticky top-0 bg-white h-fit"
-        >
+        <Tabs defaultActiveKey={"dependencies"} className="sticky top-0 bg-white h-fit">
           <Tab
             eventKey={"dependencies"}
             title={
               <p
-                title={
-                  dependencyTree.tree.length === 0
-                    ? "Lockfile provided does not contain any dependencies"
-                    : ""
-                }
-                className={`m-0 ${
-                  dependencyTree.tree.length === 0 && "text-gray-500"
-                }`}
+                title={dependencyTree.tree.length === 0 ? "Lockfile provided does not contain any dependencies" : ""}
+                className={`m-0 ${dependencyTree.tree.length === 0 && "text-gray-500"}`}
               >
                 Dependencies
               </p>
@@ -211,14 +181,8 @@ export default function DependencyTreePage() {
             eventKey={"devDependencies"}
             title={
               <p
-                title={
-                  dependencyTree.devTree.length === 0
-                    ? "Lockfile provided does not contain any dependencies"
-                    : ""
-                }
-                className={`m-0 ${
-                  dependencyTree.devTree.length === 0 && "text-gray-500"
-                }`}
+                title={dependencyTree.devTree.length === 0 ? "Lockfile provided does not contain any dependencies" : ""}
+                className={`m-0 ${dependencyTree.devTree.length === 0 && "text-gray-500"}`}
               >
                 Dev Dependencies
               </p>
@@ -236,10 +200,7 @@ export default function DependencyTreePage() {
     </>
   ) : (
     <>
-      <DragAndDrop
-        disabled={dependencyTree.isSet || loadingStatus.isLoading}
-        onFileChange={updateDependencyTree}
-      />
+      <DragAndDrop disabled={dependencyTree.isSet || loadingStatus.isLoading} onFileChange={updateDependencyTree} />
     </>
   );
 }

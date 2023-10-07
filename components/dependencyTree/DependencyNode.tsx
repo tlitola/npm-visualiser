@@ -1,11 +1,7 @@
 "use client";
 
 import { NpmPackage } from "@/utils/PackageLock";
-import {
-  faArrowUpRightFromSquare,
-  faCaretDown,
-  faCaretUp,
-} from "@fortawesome/free-solid-svg-icons";
+import { faArrowUpRightFromSquare, faCaretDown, faCaretUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useRef, useState } from "react";
@@ -44,7 +40,7 @@ export default function DependencyNode({
     await new Promise((resolve) =>
       setTimeout(() => {
         resolve(undefined);
-      }, 1500)
+      }, 1500),
     );
     nodeRef.current?.classList.remove("animate-highlight");
   };
@@ -64,15 +60,10 @@ export default function DependencyNode({
         >
           {dependency.name}
         </Link>
-        <FontAwesomeIcon
-          className="mr-2 h-3 hidden peer-hover:block"
-          icon={faArrowUpRightFromSquare}
-        />
+        <FontAwesomeIcon className="mr-2 h-3 hidden peer-hover:block" icon={faArrowUpRightFromSquare} />
 
         <Stack direction="horizontal" gap={2}>
-          <Tag
-            params={{ type: "version", version: dependency.version ?? "" }}
-          />
+          <Tag params={{ type: "version", version: dependency.version ?? "" }} />
           {dependency.cyclic && (
             <Tag
               params={{ type: "circular" }}
@@ -91,8 +82,7 @@ export default function DependencyNode({
               }}
             />
           )}
-          {packageInfo[dependency.name + "@" + dependency.version]
-            ?.unpackedSize === 0 && (
+          {packageInfo[dependency.name + "@" + dependency.version]?.unpackedSize === 0 && (
             <Tag
               params={{
                 type: "warning",
@@ -102,22 +92,19 @@ export default function DependencyNode({
           )}
         </Stack>
 
-        {(!dependency.dependencies || dependency.dependencies?.length > 0) &&
-          !dependency.cyclic && (
-            <FontAwesomeIcon
-              className="ml-3 select-none text-gray-500 hover:text-black"
-              role="button"
-              onClick={() => setOpen((prev) => !prev)}
-              icon={open ? faCaretUp : faCaretDown}
-            />
-          )}
+        {(!dependency.dependencies || dependency.dependencies?.length > 0) && !dependency.cyclic && (
+          <FontAwesomeIcon
+            className="ml-3 select-none text-gray-500 hover:text-black"
+            role="button"
+            onClick={() => setOpen((prev) => !prev)}
+            icon={open ? faCaretUp : faCaretDown}
+          />
+        )}
       </span>
       {open && dependency.dependencies && (
         <section
           style={{ marginLeft: 16 * depth }}
-          className={`flex flex-col items-start min-w-[calc(100% - ${
-            16 * depth
-          }px)]`}
+          className={`flex flex-col items-start min-w-[calc(100% - ${16 * depth}px)]`}
         >
           {dependency.dependencies.map((el) => (
             <DependencyNode

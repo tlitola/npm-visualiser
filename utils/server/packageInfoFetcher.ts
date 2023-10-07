@@ -37,7 +37,7 @@ const osvVulnerabilityResponse = z.object({
             z.object({
               type: z.string(),
               url: z.string(),
-            })
+            }),
           ),
           affected: z.array(
             z.object({
@@ -49,19 +49,19 @@ const osvVulnerabilityResponse = z.object({
                   z.object({
                     type: z.literal("SEMVER"),
                     events: z.array(z.record(z.string(), z.string())),
-                  })
+                  }),
                 )
                 .optional(),
-            })
+            }),
           ),
           severity: z.array(
             z.object({
               type: z.string(),
               score: z.string(),
-            })
+            }),
           ),
         })
-        .partial()
+        .partial(),
     )
     .optional(),
 });
@@ -80,20 +80,17 @@ export default class PackageInfoFetcher {
       async () => {
         console.log(`Fetching package data for ${packageName} from NPM...`);
 
-        const result = await this.safelyFetchJson(
-          `https://registry.npmjs.org/${packageName}/${version}`
-        );
+        const result = await this.safelyFetchJson(`https://registry.npmjs.org/${packageName}/${version}`);
 
         if (!result.ok) throw new Error(result.error);
 
         const data = npmPackageResponse.safeParse(result.data);
 
-        if (!data.success)
-          throw new Error(`Couldn't fetch package data for ${packageName}`);
+        if (!data.success) throw new Error(`Couldn't fetch package data for ${packageName}`);
 
         return data.data;
       },
-      1000 * 60 * 60
+      1000 * 60 * 60,
     );
   }
 
@@ -101,23 +98,18 @@ export default class PackageInfoFetcher {
     return this.withCache(
       `package-downloads-${packageName}`,
       async () => {
-        console.log(
-          `Fetching package downloads for ${packageName} from NPM...`
-        );
-        const result = await this.safelyFetchJson(
-          `https://api.npmjs.org/downloads/point/last-week/${packageName}`
-        );
+        console.log(`Fetching package downloads for ${packageName} from NPM...`);
+        const result = await this.safelyFetchJson(`https://api.npmjs.org/downloads/point/last-week/${packageName}`);
 
         if (!result.ok) throw new Error(result.error);
 
         const data = npmDownloadResponse.safeParse(result.data);
 
-        if (!data.success)
-          throw new Error(`Couldn't fetch package data for ${packageName}`);
+        if (!data.success) throw new Error(`Couldn't fetch package data for ${packageName}`);
 
         return data.data;
       },
-      1000 * 60 * 60
+      1000 * 60 * 60,
     );
   }
 
@@ -125,24 +117,19 @@ export default class PackageInfoFetcher {
     return this.withCache(
       `package-vulnerabilities-${packageName}-${version}`,
       async () => {
-        console.log(
-          `Fetching package vulnerabilities for ${packageName} from OSV...`
-        );
-        const result = await this.safelyFetchJson(
-          `https://api.osv.dev/v1/query`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
+        console.log(`Fetching package vulnerabilities for ${packageName} from OSV...`);
+        const result = await this.safelyFetchJson(`https://api.osv.dev/v1/query`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            version,
+            package: {
+              name: packageName,
             },
-            body: JSON.stringify({
-              version,
-              package: {
-                name: packageName,
-              },
-            }),
-          }
-        );
+          }),
+        });
 
         if (!result.ok) throw new Error(result.error);
 
@@ -155,7 +142,7 @@ export default class PackageInfoFetcher {
 
         return data.data;
       },
-      1000 * 60 * 60
+      1000 * 60 * 60,
     );
   }
 
@@ -167,34 +154,21 @@ export default class PackageInfoFetcher {
 
     const data = packageInfo.safeParse({
       ...(info.status === "fulfilled" ? info.value : {}),
-      downloads:
-        downloads.status === "fulfilled"
-          ? downloads.value.downloads
-          : undefined,
-      unpackedSize:
-        info.status === "fulfilled"
-          ? info.value.dist.unpackedSize ?? 0
-          : undefined,
-      repository:
-        info.status === "fulfilled" ? info.value.repository?.url : undefined,
+      downloads: downloads.status === "fulfilled" ? downloads.value.downloads : undefined,
+      unpackedSize: info.status === "fulfilled" ? info.value.dist.unpackedSize ?? 0 : undefined,
+      repository: info.status === "fulfilled" ? info.value.repository?.url : undefined,
     });
 
-    if (!data.success)
-      throw new Error(`Couldn't fetch package data for ${packageName}`);
+    if (!data.success) throw new Error(`Couldn't fetch package data for ${packageName}`);
 
     return data.data;
   }
 
   async getPackageVulnerabilities(packageName: string, version: string) {
-    const vulnerabilities = await this.fetchPackageVulnerabilities(
-      packageName,
-      version
-    );
+    const vulnerabilities = await this.fetchPackageVulnerabilities(packageName, version);
 
     const data = (vulnerabilities?.vulns ?? []).map((vuln) => {
-      const severityResult = vuln.severity?.find((el) =>
-        el.type?.includes("CVSS")
-      )?.score;
+      const severityResult = vuln.severity?.find((el) => el.type?.includes("CVSS"))?.score;
 
       const severity = severityResult
         ? {
@@ -209,11 +183,11 @@ export default class PackageInfoFetcher {
         version,
         ...vuln,
         from: (((vuln.affected ?? [])[0].ranges ?? [])[0]?.events?.find((el) =>
-          Object.keys(el).includes("introduced")
+          Object.keys(el).includes("introduced"),
         ) ?? {})["introduced"],
-        to: (((vuln.affected ?? [])[0].ranges ?? [])[0]?.events?.find((el) =>
-          Object.keys(el).includes("fixed")
-        ) ?? {})["fixed"],
+        to: (((vuln.affected ?? [])[0].ranges ?? [])[0]?.events?.find((el) => Object.keys(el).includes("fixed")) ?? {})[
+          "fixed"
+        ],
         severity,
       });
     });
@@ -223,7 +197,7 @@ export default class PackageInfoFetcher {
 
   async safelyFetchJson<T>(
     url: string,
-    init?: RequestInit
+    init?: RequestInit,
   ): Promise<{ ok: false; error: string } | { ok: true; data: T }> {
     const result = await this.limitedFetch(url, init);
 
@@ -245,11 +219,7 @@ export default class PackageInfoFetcher {
     return await this.limiter(() => fetch(url, init));
   }
 
-  async withCache<T>(
-    key: string,
-    func: () => Promise<T>,
-    ttl: number = 1000 * 60
-  ) {
+  async withCache<T>(key: string, func: () => Promise<T>, ttl: number = 1000 * 60) {
     return withCache(this.cache, key, func, ttl);
   }
 }

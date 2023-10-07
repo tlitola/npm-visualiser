@@ -25,39 +25,20 @@ export default function DepepndencyModal({
       <Modal.Header className="flex flex-col !place-items-start px-4 pt-4">
         <Modal.Title className="!text-3xl">
           {dependency.name}
-          <Tag
-            className="ml-4 p-2"
-            params={{ type: "version", version: dependency.version ?? "" }}
-          />
+          <Tag className="ml-4 p-2" params={{ type: "version", version: dependency.version ?? "" }} />
         </Modal.Title>
         <Stack direction="horizontal" gap={3} className="mt-2">
           {info?.homepage && (
-            <Link
-              href={info?.homepage}
-              target="_blank"
-              className="text-black hover:!text-gray-600"
-            >
+            <Link href={info?.homepage} target="_blank" className="text-black hover:!text-gray-600">
               <FontAwesomeIcon icon={faHome} className="h-6" title="Homepage" />
             </Link>
           )}
           {info?.repository && (
-            <Link
-              href={info?.repository.split("git+")[1]}
-              target="_blank"
-              className="text-black hover:!text-gray-600"
-            >
-              <FontAwesomeIcon
-                icon={faGithub}
-                className="h-6"
-                title="Repository"
-              />
+            <Link href={info?.repository.split("git+")[1]} target="_blank" className="text-black hover:!text-gray-600">
+              <FontAwesomeIcon icon={faGithub} className="h-6" title="Repository" />
             </Link>
           )}
-          <Link
-            href={baseLink + dependency.name}
-            target="_blank"
-            className="text-black hover:!text-gray-600"
-          >
+          <Link href={baseLink + dependency.name} target="_blank" className="text-black hover:!text-gray-600">
             <FontAwesomeIcon icon={faNpm} className="h-6" title="Homepage" />
           </Link>
         </Stack>

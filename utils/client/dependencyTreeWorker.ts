@@ -7,52 +7,33 @@ self.onmessage = async (e: MessageEvent<[string, any]>) => {
     case "generate":
       const result = e.data[1] as z.infer<typeof PackageLock>;
 
-      const dependencyCount = Object.keys(
-        result.packages[""].dependencies ?? {}
-      ).length;
-      const tree = createDependencyTree(
-        result,
-        "dependencies",
-        (dependencyNumber, dependencyName) => {
-          self.postMessage([
-            "loadingStatus",
-            [
-              0,
-              (dependencyNumber / dependencyCount) * 100,
-              `${dependencyNumber}/${dependencyCount}: ${dependencyName}`,
-            ],
-          ]);
-        }
-      );
+      const dependencyCount = Object.keys(result.packages[""].dependencies ?? {}).length;
+      const tree = createDependencyTree(result, "dependencies", (dependencyNumber, dependencyName) => {
+        self.postMessage([
+          "loadingStatus",
+          [0, (dependencyNumber / dependencyCount) * 100, `${dependencyNumber}/${dependencyCount}: ${dependencyName}`],
+        ]);
+      });
 
       //Rest to allow the loading animation time to catch up
       await new Promise((resolve) => setTimeout(() => resolve(""), 1000));
 
-      const devDependencyCount = Object.keys(
-        result.packages[""].devDependencies ?? {}
-      ).length;
-      const devTree = createDependencyTree(
-        result,
-        "devDependencies",
-        (dependencyNumber, dependencyName) => {
-          self.postMessage([
-            "loadingStatus",
-            [
-              1,
-              (dependencyNumber / devDependencyCount) * 100,
-              `${dependencyNumber}/${devDependencyCount}: ${dependencyName}`,
-            ],
-          ]);
-        }
-      );
+      const devDependencyCount = Object.keys(result.packages[""].devDependencies ?? {}).length;
+      const devTree = createDependencyTree(result, "devDependencies", (dependencyNumber, dependencyName) => {
+        self.postMessage([
+          "loadingStatus",
+          [
+            1,
+            (dependencyNumber / devDependencyCount) * 100,
+            `${dependencyNumber}/${devDependencyCount}: ${dependencyName}`,
+          ],
+        ]);
+      });
 
       //Rest to allow the loading animation time to catch up
       await new Promise((resolve) => setTimeout(() => resolve(""), 1000));
 
-      self.postMessage([
-        "complete",
-        [tree, devTree, Object.keys(result.packages).length - 1],
-      ]);
+      self.postMessage(["complete", [tree, devTree, Object.keys(result.packages).length - 1]]);
       break;
 
     default:

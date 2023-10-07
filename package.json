@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write ."
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
@@ -38,6 +40,7 @@
   },
   "devDependencies": {
     "@types/cache-manager-fs-hash": "^0.0.2",
-    "@types/lodash.omit": "^4.5.7"
+    "@types/lodash.omit": "^4.5.7",
+    "prettier": "^3.0.3"
   }
 }

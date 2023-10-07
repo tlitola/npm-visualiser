@@ -16,11 +16,7 @@ export default function DependencyTree({
 }) {
   return (
     <>
-      {tree.length === 0 && (
-        <p className="text-center pt-1">
-          Lockfile provided does not contain any {type}
-        </p>
-      )}
+      {tree.length === 0 && <p className="text-center pt-1">Lockfile provided does not contain any {type}</p>}
       <section id="" className="flex flex-col items-start min-w-full pt-1">
         {tree.map((el) => (
           <DependencyNode
