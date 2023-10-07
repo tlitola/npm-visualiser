@@ -1,17 +1,17 @@
 "use client";
 
 import { NpmPackage, ProjectInfo } from "@/utils/PackageLock";
-import useSWR, { useSWRConfig } from "swr";
+import { fetchAllPackagesInfo, fetchAllPackagesVulnerabilites } from "@/utils/client/fetchers";
+import { readLockFile } from "@/utils/client/parser";
+import { getPackageNameAndVersion } from "@/utils/client/utlis";
 import { useState } from "react";
+import { Row, Tab, Tabs } from "react-bootstrap";
+import useSWR, { useSWRConfig } from "swr";
+import { z } from "zod";
 import DragAndDrop from "../DragAndDrop";
 import Loading from "../Loading";
-import { z } from "zod";
-import { readLockFile } from "@/utils/client/parser";
-import { Row, Tab, Tabs } from "react-bootstrap";
-import { fetchAllPackagesInfo, fetchAllPackagesVulnerabilites } from "@/utils/client/fetchers";
-import { getPackageNameAndVersion } from "@/utils/client/utlis";
-import DependencyTree from "./DependencyTree";
 import DTPageHeader from "./DTPageHeader";
+import DependencyTree from "./DependencyTree";
 
 export default function DependencyTreePage() {
   const { mutate } = useSWRConfig();
@@ -33,12 +33,12 @@ export default function DependencyTreePage() {
     steps: string[];
   }>({ isLoading: false, step: 0, now: 0, message: "", steps: [] });
 
-  const { data: packageInfo, error: packageInfoError } = useSWR(
+  const { data: packageInfo } = useSWR(
     "packageInfo",
     () => fetchAllPackagesInfo(getPackageNameAndVersion(dependencyTree)),
     { revalidateOnFocus: false },
   );
-  const { data: vulns, error: packageVulnerabilityError } = useSWR(
+  const { data: vulns } = useSWR(
     "packageVulnerability",
     () => fetchAllPackagesVulnerabilites(getPackageNameAndVersion(dependencyTree)),
     { revalidateOnFocus: false },
@@ -49,11 +49,11 @@ export default function DependencyTreePage() {
   };
 
   const updateDependencyTree = async (newFile: File, setError: (error?: string) => void) => {
-    const handleZodParseError = (data: z.SafeParseError<any>) => {
+    function handleZodParseError<T>(data: z.SafeParseError<T>) {
       console.log(data.error.toString());
       setError("Something went wrong, please try again");
       setLoading(false);
-    };
+    }
 
     try {
       //Parse file

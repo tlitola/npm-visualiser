@@ -1,4 +1,3 @@
-import { number } from "zod";
 import { PackageInfo, PackageVulnerability } from "../Package";
 import { NpmPackage } from "../PackageLock";
 
@@ -40,16 +39,16 @@ export const getPackageNameAndVersion = ({
 ];
 
 export const findWorstVuln = (vulns: Record<string, PackageVulnerability[]>) => {
-  const [_score, text] = Object.values(vulns).reduce(
+  const text = Object.values(vulns).reduce(
     (acc, el) => {
       return el.reduce((acc2, vuln) => {
         if (!vuln.severity && acc[1] === "safe") return [0, "unknown"];
         if (!vuln.severity) return acc2;
-        return acc2[0] >= vuln.severity?.score ? acc2 : [vuln.severity?.score, vuln.severity?.text];
+        return (acc2[0] as number) >= vuln.severity?.score ? acc2 : [vuln.severity?.score, vuln.severity?.text];
       }, acc);
     },
     [0, "safe"],
-  );
+  )[1] as string;
 
   return capitalizeFirst(text) as CVSSThreadLevel;
 };

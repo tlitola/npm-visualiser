@@ -19,7 +19,7 @@ export const initializeCache = async () => {
 };
 
 export const disconnectCache = (cache: RedisStore | Cache | undefined) => {
-  //@ts-ignore
+  //@ts-expect-error Cache has client only if it's of type RedisStore
   if (cache?.client) {
     (cache as RedisStore).client.disconnect();
   }
