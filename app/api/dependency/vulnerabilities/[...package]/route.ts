@@ -1,8 +1,8 @@
 import { disconnectCache, initializeCache } from "@/utils/server/cache";
 import PackageInfoFetcher from "@/utils/server/packageInfoFetcher";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(_request: any, { params }: { params: { package: string[] } }) {
+export async function GET(request: NextRequest, { params }: { params: { package: string[] } }) {
   if (params.package.length < 2)
     return new NextResponse("Page not found", {
       status: 404,

@@ -40,7 +40,7 @@ export const lockFilePackage = basePackage.extend({
 
 export type LockFilePackage = z.infer<typeof lockFilePackage>;
 
-export const PackageLock = z.object({
+export const packageLock = z.object({
   name: z.string(),
   author: z.string().optional(),
   version: z.string().optional(),
@@ -60,4 +60,4 @@ export const PackageLock = z.object({
     .and(z.record(lockFilePackage)),
 });
 
-export type PackageLock = z.infer<typeof PackageLock>;
+export type PackageLock = z.infer<typeof packageLock>;

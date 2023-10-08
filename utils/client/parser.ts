@@ -1,10 +1,9 @@
-import { z } from "zod";
-import { PackageLock } from "../PackageLock";
+import { PackageLock, packageLock } from "../PackageLock";
 
 export const readLockFile = async (
   file: File,
   updateLoadingStatus?: (status: boolean) => void,
-): Promise<z.infer<typeof PackageLock>> => {
+): Promise<PackageLock> => {
   if (file?.type !== "application/json") throw new Error("Couldn't parse the file, please make sure it is valid JSON");
   updateLoadingStatus && updateLoadingStatus(true);
 
@@ -18,7 +17,7 @@ export const readLockFile = async (
     throw new Error("Couldn't parse the file, please make sure it is valid JSON");
   }
 
-  const result = PackageLock.safeParse(json);
+  const result = packageLock.safeParse(json);
 
   if (!result.success) {
     console.log(result.error.toString());

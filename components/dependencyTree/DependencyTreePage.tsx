@@ -12,6 +12,7 @@ import DragAndDrop from "../DragAndDrop";
 import Loading from "../Loading";
 import DTPageHeader from "./DTPageHeader";
 import DependencyTree from "./DependencyTree";
+import { LoadingStatusUpdate, ParseCompleteMessage, loadingStatusUpdate } from "@/utils/protocol";
 
 export default function DependencyTreePage() {
   const { mutate } = useSWRConfig();
@@ -84,10 +85,12 @@ export default function DependencyTreePage() {
           setLoading(false);
         };
 
-        worker.onmessage = (e: MessageEvent<[string, any]>) => {
+        worker.onmessage = (
+          e: MessageEvent<["complete", ParseCompleteMessage] | ["loadingStatus", LoadingStatusUpdate]>,
+        ) => {
           switch (e.data[0]) {
             case "complete":
-              const [tree, devTree, count] = e.data[1] as [NpmPackage[], NpmPackage[], number];
+              const [tree, devTree, count] = e.data[1];
 
               setLoadingStatus((prev) => ({
                 ...prev,
@@ -120,7 +123,7 @@ export default function DependencyTreePage() {
               break;
 
             case "loadingStatus":
-              const loadingData = z.tuple([z.number(), z.number(), z.string()]).safeParse(e.data[1]);
+              const loadingData = loadingStatusUpdate.safeParse(e.data[1]);
               if (!loadingData.success) {
                 handleZodParseError(loadingData);
                 return;
