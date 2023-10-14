@@ -9,7 +9,7 @@ import {
   getVulnsCountText,
   packageSizeMissing,
   sortBySeverity,
-} from "./utlis";
+} from "./utils";
 import { PackageFactory, PackageInfoFactory, buildPackageInfoRecord } from "../../test/factories/packageInfoFactory";
 import { NpmPackage } from "../PackageLock";
 import { VulnerabilityFactory, buildVulnerabilitiesRecord } from "../../test/factories/vulnerabilityFactory";

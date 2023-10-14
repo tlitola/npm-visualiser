@@ -1,6 +1,6 @@
 import { PackageInfo, PackageVulnerability } from "@/utils/Package";
 import { NpmPackage } from "@/utils/PackageLock";
-import { capitalizeFirst, sortBySeverity, addMetricSuffix } from "@/utils/client/utlis";
+import { capitalizeFirst, sortBySeverity, addMetricSuffix } from "@/utils/client/utils";
 import { faGithub, faNpm } from "@fortawesome/free-brands-svg-icons";
 import { faHome } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

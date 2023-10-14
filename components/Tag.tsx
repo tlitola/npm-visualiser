@@ -1,4 +1,4 @@
-import { CVSSThreadLevel } from "@/utils/client/utlis";
+import { CVSSThreadLevel } from "@/utils/client/utils";
 import { faCircleExclamation, faRotateBack, faWarning } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ComponentPropsWithoutRef } from "react";

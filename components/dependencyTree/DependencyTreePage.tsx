@@ -3,7 +3,7 @@
 import { NpmPackage, ProjectInfo } from "@/utils/PackageLock";
 import { fetchAllPackagesInfo, fetchAllPackagesVulnerabilites } from "@/utils/client/fetchers";
 import { readLockFile } from "@/utils/client/parser";
-import { getPackageNameAndVersion } from "@/utils/client/utlis";
+import { getPackageNameAndVersion } from "@/utils/client/utils";
 import { useState } from "react";
 import { Row, Tab, Tabs } from "react-bootstrap";
 import useSWR, { useSWRConfig } from "swr";

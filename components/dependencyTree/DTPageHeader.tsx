@@ -8,7 +8,7 @@ import {
   findWorstVuln,
   getVulnsCountText,
   packageSizeMissing,
-} from "@/utils/client/utlis";
+} from "@/utils/client/utils";
 import { PackageInfo, PackageVulnerability } from "@/utils/Package";
 import { faWarning } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

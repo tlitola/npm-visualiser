@@ -8,7 +8,7 @@ import { useRef, useState } from "react";
 import Tag from "../Tag";
 import { Stack } from "react-bootstrap";
 import { PackageInfo, PackageVulnerability } from "@/utils/Package";
-import { findWorstVuln } from "@/utils/client/utlis";
+import { findWorstVuln } from "@/utils/client/utils";
 import DepepndencyModal from "./DependencyModal";
 
 const baseLink = "https://www.npmjs.com/package/";
