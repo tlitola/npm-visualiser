@@ -15,7 +15,20 @@ export const packageInfo = z
 
 export type PackageInfo = z.infer<typeof packageInfo>;
 
+export const downloadHistory = z.object({
+  package: z.string(),
+  downloads: z.array(
+    z.object({
+      downloads: z.number(),
+      week: z.string(),
+    }),
+  ),
+});
+
+export type DownloadHistory = z.infer<typeof downloadHistory>;
+
 export const packageVulnerability = z.object({
+  id: z.string(),
   name: z.string(),
   version: z.string(),
   summary: z.string(),

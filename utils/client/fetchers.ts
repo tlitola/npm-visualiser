@@ -1,9 +1,14 @@
 import { z } from "zod";
-import { packageInfo, packageVulnerability } from "../Package";
+import { downloadHistory, packageInfo, packageVulnerability } from "../Package";
 
 export const fetchPackageInfo = async (name: string, version: string) => {
   const result = await fetch(`/api/dependency/${name}/${version}`);
   return packageInfo.parse(await result.json());
+};
+
+export const fetchDownloadsHistory = async (name: string) => {
+  const result = await fetch(`/api/download_history/${name}`);
+  return downloadHistory.parse(await result.json());
 };
 
 export const fetchAllPackagesInfo = async (packages: [string, string][]) => {

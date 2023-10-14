@@ -1,10 +1,10 @@
 import pLimit, { LimitFunction } from "p-limit";
 import { z } from "zod";
-import { packageInfo, packageVulnerability } from "../Package";
+import { downloadHistory, packageInfo, packageVulnerability } from "../Package";
 import { Cache } from "cache-manager";
 import { withCache } from "./cache";
 import { RedisStore } from "cache-manager-redis-yet";
-import { getVulnerabilityScore, getVulnerabilitySeverity } from "./utils";
+import { getNpmDateRange, getVulnerabilityScore, getVulnerabilitySeverity, getWeeklyDownloads } from "./utils";
 
 const npmPackageResponse = z.object({
   name: z.string(),
@@ -21,6 +21,18 @@ const npmDownloadResponse = z.object({
   start: z.string(),
   end: z.string(),
   package: z.string(),
+});
+
+export const npmDownloadsResponse = z.object({
+  start: z.string(),
+  end: z.string(),
+  package: z.string(),
+  downloads: z.array(
+    z.object({
+      downloads: z.number(),
+      day: z.string(),
+    }),
+  ),
 });
 
 const osvVulnerabilityResponse = z.object({
@@ -113,6 +125,27 @@ export default class PackageInfoFetcher {
     );
   }
 
+  async fetchPackageDownloadHistory(packageName: string) {
+    return this.withCache(
+      `package-download-history-${packageName}`,
+      async () => {
+        console.log(`Fetching package download history for ${packageName} from NPM...`);
+        const result = await this.safelyFetchJson(
+          `https://api.npmjs.org/downloads/range/${getNpmDateRange(new Date())}/${packageName}`,
+        );
+
+        if (!result.ok) throw new Error(result.error);
+
+        const data = npmDownloadsResponse.safeParse(result.data);
+
+        if (!data.success) throw new Error(`Couldn't fetch download history for ${packageName}`);
+
+        return data.data;
+      },
+      1000 * 60 * 60,
+    );
+  }
+
   async fetchPackageVulnerabilities(packageName: string, version: string) {
     return this.withCache(
       `package-vulnerabilities-${packageName}-${version}`,
@@ -144,6 +177,20 @@ export default class PackageInfoFetcher {
       },
       1000 * 60 * 60,
     );
+  }
+
+  async getPackageDownloadHistory(packageName: string) {
+    const downloads = await this.fetchPackageDownloadHistory(packageName);
+
+    console.log(getWeeklyDownloads(downloads));
+    const data = downloadHistory.safeParse({
+      ...downloads,
+      downloads: getWeeklyDownloads(downloads),
+    });
+
+    if (!data.success) throw new Error(`Couldn't fetch download history for ${packageName}`);
+
+    return data.data;
   }
 
   async getPackageInfo(packageName: string, version: string) {

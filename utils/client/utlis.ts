@@ -8,13 +8,13 @@ const dividers: [number, string][] = [
   [1e3, "K"],
 ];
 
-const addMetricSuffix = (number: number, suffix?: string) => {
+export const addMetricSuffix = (number: number, suffix?: string) => {
   for (let i = 0; i < dividers.length; i++) {
     if (number >= dividers[i][0]) {
-      return (number / dividers[i][0]).toFixed(2) + dividers[i][1] + suffix;
+      return (number / dividers[i][0]).toFixed(2) + dividers[i][1] + (suffix ?? "");
     }
   }
-  return number.toFixed(2) + suffix;
+  return number.toFixed(2) + (suffix ?? "");
 };
 
 export const calculateDownloadSize = (data?: Record<string, PackageInfo>) => {
@@ -24,18 +24,22 @@ export const calculateDownloadSize = (data?: Record<string, PackageInfo>) => {
 };
 
 export const packageSizeMissing = (data?: Record<string, PackageInfo>) => {
-  return data && Object.keys(data).length !== 0 && Object.values(data).some((el) => el.unpackedSize === 0);
+  return (
+    data &&
+    Object.keys(data).length !== 0 &&
+    Object.values(data).some((el) => !el.unpackedSize || el.unpackedSize === 0)
+  );
 };
 
 export const getPackageNameAndVersion = ({
   tree,
   devTree,
 }: {
-  tree: NpmPackage[];
-  devTree: NpmPackage[];
+  tree?: NpmPackage[];
+  devTree?: NpmPackage[];
 }): [string, string][] => [
-  ...(tree.map((el) => [el.name ?? "", el.version ?? ""]) as [string, string][]),
-  ...(devTree.map((el) => [el.name ?? "", el.version ?? ""]) as [string, string][]),
+  ...((tree ?? []).map((el) => [el.name ?? "", el.version ?? ""]) as [string, string][]),
+  ...((devTree ?? []).map((el) => [el.name ?? "", el.version ?? ""]) as [string, string][]),
 ];
 
 export const findWorstVuln = (vulns: Record<string, PackageVulnerability[]>) => {
@@ -86,3 +90,17 @@ export const calculateTotalDependencyCount = (dependencies: NpmPackage[]) => {
     }, 0) + dependencies.length
   );
 };
+
+const severityOrder: { [key: string]: number } = {
+  Critical: 0,
+  High: 1,
+  Medium: 2,
+  Low: 3,
+  Unknown: 4,
+};
+
+export const sortBySeverity = (vulns?: PackageVulnerability[]) =>
+  [...(vulns ?? [])].sort(
+    (vuln1, vuln2) =>
+      severityOrder[vuln1.severity?.text ?? "Unknown"] - severityOrder[vuln2.severity?.text ?? "Unknown"],
+  );
