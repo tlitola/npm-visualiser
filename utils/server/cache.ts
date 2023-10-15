@@ -1,6 +1,9 @@
 import fsStore from "cache-manager-fs-hash";
 import { caching, Cache } from "cache-manager";
 import { RedisStore, redisStore } from "cache-manager-redis-yet";
+import { RedisClientType } from "redis";
+
+export type AppCache = RedisStore<RedisClientType> | Cache;
 
 export const initializeCache = async () => {
   const ttl = 1000 * 60;
@@ -18,15 +21,15 @@ export const initializeCache = async () => {
   return cache;
 };
 
-export const disconnectCache = (cache: RedisStore | Cache | undefined) => {
+export const disconnectCache = async (cache: RedisStore | Cache | undefined) => {
   //@ts-expect-error Cache has client only if it's of type RedisStore
   if (cache?.client) {
-    (cache as RedisStore).client.disconnect();
+    await (cache as RedisStore).client.disconnect();
   }
 };
 
 export const withCache = async <T>(
-  cache: Cache | RedisStore | undefined,
+  cache: AppCache | undefined,
   key: string,
   func: () => Promise<T>,
   ttl: number = 1000 * 60,
@@ -39,4 +42,14 @@ export const withCache = async <T>(
   const result = await func();
   await cache.set(key, result, ttl);
   return result;
+};
+
+export const handleWithCache = async <Response>(func: (cache: AppCache) => Response): Promise<Response> => {
+  const cache = await initializeCache();
+
+  try {
+    return func(cache);
+  } finally {
+    await disconnectCache(cache);
+  }
 };
