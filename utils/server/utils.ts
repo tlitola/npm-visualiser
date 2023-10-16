@@ -25,12 +25,13 @@ export const getWeeklyDownloads = (
 
   const result = [];
 
-  for (let i = startIndex; i < downloads.downloads.length; i += 7) {
+  for (let i = startIndex; i < downloads.downloads.length - 6; i += 7) {
     const weeklyDownloads = downloads.downloads.slice(i, i + 7).reduce((acc, el) => (acc += el.downloads), 0);
     result.push({
       week: `${downloads.downloads[i].day} to ${downloads.downloads[i + 6].day}`,
       downloads: weeklyDownloads,
     });
   }
+
   return result;
 };
