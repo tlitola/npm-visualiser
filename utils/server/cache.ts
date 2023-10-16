@@ -5,7 +5,7 @@ import { RedisClientType } from "redis";
 
 export type AppCache = RedisStore<RedisClientType> | Cache;
 
-export const initializeCache = async () => {
+export const initializeCache = async (): Promise<AppCache> => {
   const ttl = 1000 * 60;
 
   const cache = process.env.REDIS_URL
@@ -24,7 +24,8 @@ export const initializeCache = async () => {
 export const disconnectCache = async (cache: RedisStore | Cache | undefined) => {
   //@ts-expect-error Cache has client only if it's of type RedisStore
   if (cache?.client) {
-    await (cache as RedisStore).client.disconnect();
+    cache = cache as RedisStore;
+    cache.client.isOpen && (await cache.client.disconnect());
   }
 };
 
@@ -48,7 +49,7 @@ export const handleWithCache = async <Response>(func: (cache: AppCache) => Respo
   const cache = await initializeCache();
 
   try {
-    return func(cache);
+    return await func(cache);
   } finally {
     await disconnectCache(cache);
   }
