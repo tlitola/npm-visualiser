@@ -8,7 +8,6 @@
       "name": "dividends",
       "dependencies": {
         "quill-mention": "3.4.1",
-        "imagery_export": "3.3.3",
         "@fortawesome/fontawesome-svg-core": "6.4.0",
         "@fortawesome/free-solid-svg-icons": "6.4.0",
         "@fortawesome/react-fontawesome": "0.2.0",
@@ -88,9 +87,6 @@
         "ts-node": "10.9.1",
         "typescript": "5.1.6"
       }
-    },
-    "node_modules/imagery_export": {
-      "version": "3.3.3"
     },
     "node_modules/quill-mention": {
       "version": "3.4.1"

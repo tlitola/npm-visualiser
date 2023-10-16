@@ -17,18 +17,14 @@ export const addMetricSuffix = (number: number, suffix?: string) => {
   return number.toFixed(2) + (suffix ?? "");
 };
 
-export const calculateDownloadSize = (data?: Record<string, PackageInfo>) => {
-  const size = Object.values(data ?? {}).reduce((acc, el) => acc + (el.unpackedSize ?? 0), 0);
+export const calculateDownloadSize = (data: Record<string, PackageInfo>) => {
+  const size = Object.values(data).reduce((acc, el) => acc + (el.unpackedSize ?? 0), 0);
 
   return addMetricSuffix(size, "B");
 };
 
-export const packageSizeMissing = (data?: Record<string, PackageInfo>) => {
-  return (
-    data &&
-    Object.keys(data).length !== 0 &&
-    Object.values(data).some((el) => !el.unpackedSize || el.unpackedSize === 0)
-  );
+export const packageSizeMissing = (data: Record<string, PackageInfo>) => {
+  return Object.keys(data).length !== 0 && Object.values(data).some((el) => !el.unpackedSize || el.unpackedSize === 0);
 };
 
 export const getPackageNameAndVersion = ({
@@ -58,6 +54,10 @@ export const findWorstVuln = (vulns: Record<string, PackageVulnerability[]>) => 
 };
 
 export type CVSSThreadLevel = "Low" | "Medium" | "High" | "Critical" | "Unknown";
+
+export const getVulnsCount = (vulns: Record<string, PackageVulnerability[]>) => {
+  return Object.values(vulns).reduce((acc, vuln) => acc + vuln.length, 0);
+};
 
 export const getVulnCounts = (vulns: Record<string, PackageVulnerability[]>) => {
   return Object.values(vulns).reduce(

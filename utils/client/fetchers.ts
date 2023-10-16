@@ -12,6 +12,7 @@ export const fetchDownloadsHistory = async (name: string) => {
 };
 
 export const fetchAllPackagesInfo = async (packages: [string, string][]) => {
+  if (packages.length === 0) return undefined;
   const result = await Promise.all(
     packages.map(async (el) => {
       const [name, version] = el;
@@ -32,6 +33,7 @@ export const fetchPackageVulnerabies = async (name: string, version: string) => 
 };
 
 export const fetchAllPackagesVulnerabilites = async (packages: [string, string][]) => {
+  if (packages.length === 0) return undefined;
   const result = await Promise.all(
     packages.map(async (el) => {
       const [name, version] = el;

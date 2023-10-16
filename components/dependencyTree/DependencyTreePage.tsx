@@ -154,12 +154,7 @@ export default function DependencyTreePage() {
     />
   ) : dependencyTree.isSet ? (
     <>
-      <DTPageHeader
-        vulns={vulns ?? {}}
-        packageInfo={packageInfo ?? {}}
-        dependencyTree={dependencyTree}
-        project={project}
-      />
+      <DTPageHeader vulns={vulns} packageInfo={packageInfo} dependencyTree={dependencyTree} project={project} />
       <Row className="h-full overflow-y-scroll p-2 py-0 rounded-sm shadow content-start scroll-pt-24 scroll-smooth">
         <Tabs defaultActiveKey={"dependencies"} className="sticky top-0 bg-white h-fit">
           <Tab

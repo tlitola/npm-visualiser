@@ -6,6 +6,7 @@ import {
   calculateTotalDependencyCount,
   capitalizeFirst,
   findWorstVuln,
+  getVulnsCount,
   getVulnsCountText,
   packageSizeMissing,
 } from "@/utils/client/utils";
@@ -13,14 +14,17 @@ import { PackageInfo, PackageVulnerability } from "@/utils/Package";
 import { faWarning } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+
 export default function DTPageHeader({
   project,
   dependencyTree,
   packageInfo,
   vulns,
 }: {
-  packageInfo: Record<string, PackageInfo>;
-  vulns: Record<string, PackageVulnerability[]>;
+  packageInfo?: Record<string, PackageInfo>;
+  vulns?: Record<string, PackageVulnerability[]>;
   project?: ProjectInfo;
   dependencyTree: {
     tree: NpmPackage[];
@@ -56,20 +60,22 @@ export default function DTPageHeader({
               dependencyTree.tree.length + dependencyTree.devTree.length
             }`}</Card.Footer>
           </Card>
-          <Card className="!h-32 !w-32 py-2" title={getVulnsCountText(vulns)}>
+          <Card className="!h-32 !w-32 py-2" title={vulns && getVulnsCountText(vulns)}>
             <Card.Title className="!text-base text-center font-normal mb-0">Vulnerabilities</Card.Title>
-            <Card.Body className="text-center font-bold">{Object.keys(vulns).length}</Card.Body>
+            <Card.Body className="text-center font-bold">
+              {vulns ? getVulnsCount(vulns) : <Skeleton className="!w-3/4" />}
+            </Card.Body>
             <Card.Footer
-              className={`font-light text-sm text-center bg-vuln-${findWorstVuln(vulns).toLowerCase()} mt-[1px]`}
+              className={`font-light text-sm text-center bg-vuln-${findWorstVuln(vulns ?? {}).toLowerCase()} mt-[1px]`}
             >
-              {capitalizeFirst(findWorstVuln(vulns))}
+              {vulns ? capitalizeFirst(findWorstVuln(vulns)) : <Skeleton className="!w-3/4" />}
             </Card.Footer>
           </Card>
           <Card className="!h-32 !w-32 py-2" title="Size of all dependencies combined">
             <Card.Title className="!text-base text-center font-normal mb-0">Download size</Card.Title>
-            <Card.Body className="m-auto text-center font-bold flex flex-row items-center">
-              {calculateDownloadSize(packageInfo)}
-              {packageSizeMissing(packageInfo) && (
+            <Card.Body className={`text-center font-bold ${packageInfo && "flex flex-row items-center px-0 mx-auto"}`}>
+              {packageInfo ? calculateDownloadSize(packageInfo) : <Skeleton className="!w-3/4" />}
+              {packageSizeMissing(packageInfo ?? {}) && (
                 <FontAwesomeIcon title="Couldn't find the size of some packages" className="ml-2" icon={faWarning} />
               )}
             </Card.Body>
