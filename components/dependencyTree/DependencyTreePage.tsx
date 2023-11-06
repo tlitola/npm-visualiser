@@ -8,11 +8,11 @@ import { useState } from "react";
 import { Row, Tab, Tabs } from "react-bootstrap";
 import useSWR, { useSWRConfig } from "swr";
 import { z } from "zod";
-import DragAndDrop from "../DragAndDrop";
 import Loading from "../Loading";
 import DTPageHeader from "./DTPageHeader";
 import DependencyTree from "./DependencyTree";
 import { LoadingStatusUpdate, ParseCompleteMessage, loadingStatusUpdate } from "@/utils/protocol";
+import DragAndDropPage from "./DragAndDropPage";
 
 export default function DependencyTreePage() {
   const { mutate } = useSWRConfig();
@@ -155,7 +155,7 @@ export default function DependencyTreePage() {
   ) : dependencyTree.isSet ? (
     <>
       <DTPageHeader vulns={vulns} packageInfo={packageInfo} dependencyTree={dependencyTree} project={project} />
-      <Row className="h-full overflow-y-scroll p-2 py-0 rounded-sm shadow content-start scroll-pt-24 scroll-smooth">
+      <Row className="w-full h-full overflow-y-scroll p-2 py-0 rounded-sm shadow content-start scroll-pt-24 scroll-smooth">
         <Tabs defaultActiveKey={"dependencies"} className="sticky top-0 bg-white h-fit">
           <Tab
             eventKey={"dependencies"}
@@ -198,7 +198,7 @@ export default function DependencyTreePage() {
     </>
   ) : (
     <>
-      <DragAndDrop disabled={dependencyTree.isSet || loadingStatus.isLoading} onFileChange={updateDependencyTree} />
+      <DragAndDropPage disabled={dependencyTree.isSet || loadingStatus.isLoading} onFileChange={updateDependencyTree} />
     </>
   );
 }

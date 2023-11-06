@@ -33,7 +33,7 @@ export default function DTPageHeader({
   };
 }) {
   return (
-    <Row className="mb-4">
+    <Row className="mb-4 w-full">
       <Col>
         <Stack direction="horizontal" className="mb-1">
           <h1 className="my-auto mr-4">{project?.name}</h1>

@@ -63,11 +63,10 @@ export default function DragAndDrop({
         onDragLeave={stopWindowDrag}
       />
       <Card
-        bg={`${!droppable && !error && "light"}`}
         border={`${error ? "danger" : !droppable ? "secondary" : "info"}`}
-        className={`mx-auto w-3/5 ${error ? "!bg-rose-100" : "!bg-blue-100"} border-2 ${
-          !droppable && "!border-dashed"
-        } transition-all box-border`}
+        className={`mx-auto w-3/5 ${error ? "!bg-rose-100" : droppable ? "!bg-blue-100" : "!bg-white"} border-2 ${
+          !droppable ? (dragging ? "!border-dashed" : "border-transparent") : "border-solid"
+        } transition-all box-border shadow p-3`}
         onDragEnter={startDrag}
         onDragLeave={stopDrag}
         onDrop={handleDrop}
@@ -81,11 +80,12 @@ export default function DragAndDrop({
           <FontAwesomeIcon icon={faFileArrowDown} className={`w-24 h-24 m-auto`} />
           <CardTitle className={`${droppable && "!text-blue-600"} text-center m-0 transition-all`}>{`${
             !droppable ? "Drag and " : ""
-          }Drop here`}</CardTitle>
+          }Drop here to start`}</CardTitle>
           <CardText className={`${droppable && "text-blue-600"} text-center m-0`}>or</CardText>
 
           <input accept=".json" ref={fileInputRef} type="file" className="hidden" onChange={handleFileSubmit} />
           <Button
+            className="!font-semibold"
             disabled={disabled || (!error && droppable)}
             onClick={() => {
               fileInputRef.current?.click();
