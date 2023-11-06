@@ -25,9 +25,15 @@ const config: Config = {
           "99%": { backgroundOpacity: "0" },
           "100%": { backgroundColor: "initial", backgroundOpacity: "initial" },
         },
+        dots: {
+          to: {
+            width: "40px",
+          },
+        },
       },
       animation: {
         highlight: "highlight 1500ms ease-out",
+        dots: "dots steps(4, end) 2000ms infinite",
       },
     },
   },

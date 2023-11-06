@@ -5,7 +5,7 @@ import { fetchAllPackagesInfo, fetchAllPackagesVulnerabilites } from "@/utils/cl
 import { readLockFile } from "@/utils/client/parser";
 import { getPackageNameAndVersion } from "@/utils/client/utils";
 import { useState } from "react";
-import { Row, Tab, Tabs } from "react-bootstrap";
+import { Card, Row, Tab, Tabs } from "react-bootstrap";
 import useSWR, { useSWRConfig } from "swr";
 import { z } from "zod";
 import Loading from "../Loading";
@@ -96,7 +96,7 @@ export default function DependencyTreePage() {
                 ...prev,
                 step: prev.step + 1,
                 now: 0,
-                message: "Complete",
+                message: "Complete\n ",
               }));
 
               setTimeout(async () => {
@@ -134,7 +134,7 @@ export default function DependencyTreePage() {
                 ...prev,
                 step,
                 now,
-                message,
+                message: "Current dependency:\n" + message,
               }));
           }
         };
@@ -145,14 +145,7 @@ export default function DependencyTreePage() {
     }
   };
 
-  return loadingStatus.isLoading ? (
-    <Loading
-      statusText={loadingStatus.message}
-      step={loadingStatus.step}
-      now={loadingStatus.now}
-      steps={loadingStatus.steps}
-    />
-  ) : dependencyTree.isSet ? (
+  return dependencyTree.isSet ? (
     <>
       <DTPageHeader vulns={vulns} packageInfo={packageInfo} dependencyTree={dependencyTree} project={project} />
       <Row className="w-full h-full overflow-y-scroll p-2 py-0 rounded-sm shadow content-start scroll-pt-24 scroll-smooth">
@@ -199,6 +192,23 @@ export default function DependencyTreePage() {
   ) : (
     <>
       <DragAndDropPage disabled={dependencyTree.isSet || loadingStatus.isLoading} onFileChange={updateDependencyTree} />
+      {loadingStatus.isLoading && (
+        <>
+          <div className={` z-0 transition-all  bg-black h-screen w-screen fixed top-0 left-0 opacity-40 `} />
+          <Card className="!h-1/2 flex flex-col items-center justify-center !fixed top-1/2 -translate-y-1/2 px-12 w-5/6">
+            <h2 className="w-[333px] font-bold text-slate-700 after:inline-block after:content-['…'] after:align-bottom after:overflow-hidden after:w-0 after:animate-dots">
+              Parsing the lockfile
+            </h2>
+            <p className="text-slate-700 font-medium text-xl mb-12">This should only take a few seconds</p>
+            <Loading
+              statusText={loadingStatus.message}
+              step={loadingStatus.step}
+              now={loadingStatus.now}
+              steps={loadingStatus.steps}
+            />
+          </Card>{" "}
+        </>
+      )}
     </>
   );
 }

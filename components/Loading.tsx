@@ -14,13 +14,13 @@ export default function Loading({
   now: number;
 }) {
   return (
-    <div className="w-full px-20 py-10">
+    <div className="w-full">
       <div className="flex items-center w-full">
         {steps.map((el, i) => (
           <Step label={el} now={i > step ? 0 : step === i ? now : 100} key={el} done={now > 100 || step > i} />
         ))}
       </div>
-      <p className="text-center w-full mt-12">{statusText}</p>
+      <p className="text-center w-full mt-12 mb-0 text-slate-700 text-lg font-medium whitespace-pre">{statusText}</p>
     </div>
   );
 }
@@ -33,7 +33,9 @@ function Step({ now, label, done }: { now: number; label: string; done: boolean 
         <div className="h-12 w-12 border-emerald-700 border-4 rounded-full grid place-items-center box-border m-1">
           <FontAwesomeIcon icon={faCheck} className={`${!done ? "scale-0" : "scale-100"}  text-emerald-700 w-8 h-8`} />
         </div>
-        <p className="absolute left-1/2 -translate-x-1/2 text-center leading-4">{label}</p>
+        <p className="absolute left-1/2 -translate-x-1/2 text-center leading-7 font-medium text-slate-700 text-lg">
+          {label}
+        </p>
       </div>
     </div>
   );
