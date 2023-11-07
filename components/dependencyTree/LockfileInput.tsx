@@ -61,7 +61,7 @@ export default function LockfileInput() {
         isLoading: true,
         step: 0,
         now: 0,
-        message: "",
+        message: "Current: \n s",
         steps,
       });
 
