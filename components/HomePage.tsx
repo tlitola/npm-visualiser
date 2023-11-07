@@ -1,7 +1,7 @@
 import Image from "next/image";
-import graphPic from "../public/images/graph_background.svg";
-import { Stack } from "react-bootstrap";
 import Link from "next/link";
+import { Stack } from "react-bootstrap";
+import graphPic from "../public/images/graph_background.svg";
 import LockfileInput from "./dependencyTree/LockfileInput";
 
 export default function HomePage() {
