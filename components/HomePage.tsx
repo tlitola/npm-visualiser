@@ -8,7 +8,7 @@ export default function HomePage() {
   return (
     <>
       <section className="min-h-[max(70vh,500px);]  w-screen flex flex-col items-center justify-center relative -mt-16">
-        <Image src={graphPic} alt="background graphic" fill={true} className="opacity-[7%]" />
+        <Image src={graphPic} alt="background graphic" fill={true} className="opacity-[7%] pointer-events-none" />
         <h1 className="font-bold text-slate-700">Package-lock visualizer</h1>
         <p className="text-slate-700 font-medium text-xl mb-14">Learn what your project depends on</p>
         <LockfileInput />

@@ -2,7 +2,7 @@
 
 import { faFileArrowDown, faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { DragEventHandler, useRef, useState } from "react";
+import { DragEventHandler, useEffect, useRef, useState } from "react";
 import { Button, Card, CardBody, CardText, CardTitle } from "react-bootstrap";
 export default function DragAndDrop({
   onFileChange,
@@ -51,16 +51,25 @@ export default function DragAndDrop({
     }
   };
 
+  useEffect(() => {
+    //@ts-expect-error Typings of the windown.addEventListener and DragEventHandler seems to give unnecessary error.
+    window.addEventListener("dragenter", startWindowDrag);
+    //@ts-expect-error Typings of the windown.addEventListener and DragEventHandler seems to give unnecessary error.
+    window.addEventListener("drop", stopWindowDrag);
+    //@ts-expect-error Typings of the windown.addEventListener and DragEventHandler seems to give unnecessary error.
+    window.addEventListener("dragover", startWindowDrag);
+    //@ts-expect-error Typings of the windown.addEventListener and DragEventHandler seems to give unnecessary error.
+    window.addEventListener("dragleave", stopWindowDrag);
+  });
+
   return (
     <>
       <div
         className={`${
-          !dragging && "opacity-0"
-        } z-0 transition-all  bg-black h-screen w-screen fixed top-0 left-0 opacity-20 ${droppable && "opacity-10"}`}
-        onDragEnter={startWindowDrag}
-        onDrop={stopWindowDrag}
-        onDragOver={startWindowDrag}
-        onDragLeave={stopWindowDrag}
+          !dragging && "hidden "
+        } z-0 transition-all  bg-black h-screen w-screen fixed top-0 left-0  opacity-20 ${
+          droppable && "opacity-10"
+        } pointer-events-none`}
       />
       <Card
         border={`${error ? "danger" : !droppable ? "secondary" : "info"}`}
