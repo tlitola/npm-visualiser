@@ -1,8 +1,9 @@
 import pLimit, { LimitFunction } from "p-limit";
 import { z } from "zod";
 import { DownloadHistory, downloadHistory, packageInfo, packageVulnerability } from "../Package";
-import { AppCache, withCache } from "./cache";
+import { withCache } from "./cache";
 import { getNpmDateRange, getVulnerabilityScore, getVulnerabilitySeverity, getWeeklyDownloads } from "./utils";
+import { Cache } from "cache-manager";
 
 const npmPackageResponse = z.object({
   name: z.string(),
@@ -78,8 +79,8 @@ const osvVulnerabilityResponse = z.object({
 
 export default class PackageInfoFetcher {
   private readonly limiter: LimitFunction;
-  private readonly cache?: AppCache;
-  constructor(cache?: AppCache) {
+  private readonly cache?: Cache;
+  constructor(cache?: Cache) {
     this.limiter = pLimit(5);
     this.cache = cache;
   }
