@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { mock } from "vitest-mock-extended";
-import { downloadHistoryHandler } from "./route";
+import { downloadHistoryHandler } from "./handler";
 import PackageInfoFetcher from "@/utils/server/packageInfoFetcher";
 
 describe("GET download history", () => {

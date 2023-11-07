@@ -1,13 +1,15 @@
 import { z } from "zod";
 import { PackageInfo, PackageVulnerability, downloadHistory, packageInfo, packageVulnerability } from "../Package";
 
+const { signal } = new AbortController();
+
 export const fetchPackageInfo = async (name: string, version: string): Promise<PackageInfo> => {
-  const result = await fetch(`/api/dependency/${name}/${version}`);
+  const result = await fetch(`/api/dependency/${name}/${version}`, { signal });
   return packageInfo.parse(await result.json());
 };
 
 export const fetchDownloadsHistory = async (name: string) => {
-  const result = await fetch(`/api/download_history/${name}`);
+  const result = await fetch(`/api/download_history/${name}`, { signal });
   return downloadHistory.parse(await result.json());
 };
 
