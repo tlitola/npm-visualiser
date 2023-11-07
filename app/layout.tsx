@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 import { open_sans } from "./fonts";
 
 export const metadata: Metadata = {
-  title: "NPM visualier",
+  title: "NPM visualizer",
   description: "Explore the secrets of package-lock",
 };
 
