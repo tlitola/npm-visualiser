@@ -96,7 +96,10 @@ export default function DependencyNode({
           <FontAwesomeIcon
             className="ml-3 select-none text-gray-500 hover:text-black"
             role="button"
-            onClick={() => setOpen((prev) => !prev)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpen((prev) => !prev);
+            }}
             icon={open ? faCaretUp : faCaretDown}
           />
         )}
