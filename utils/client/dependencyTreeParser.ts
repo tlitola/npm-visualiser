@@ -2,7 +2,7 @@ import { LockFilePackage, NpmPackage, PackageLock, npmPackage } from "../Package
 
 import omit from "lodash.omit";
 
-export const createDependencyTree = (
+export const createDependencyGraph = (
   lockfile: PackageLock,
   type: "dependencies" | "devDependencies" = "dependencies",
   updateStatus?: (dependencyNumber: number, name: string, subPackageName?: string) => void,

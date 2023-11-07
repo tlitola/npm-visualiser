@@ -1,5 +1,5 @@
 import { PackageLock } from "../PackageLock";
-import { createDependencyTree } from "./dependencyTreeParser";
+import { createDependencyGraph } from "./dependencyTreeParser";
 import { LoadingStatusUpdate, ParseCompleteMessage } from "../protocol";
 
 self.onmessage = async (e: MessageEvent<[string, PackageLock]>) => {
@@ -8,7 +8,7 @@ self.onmessage = async (e: MessageEvent<[string, PackageLock]>) => {
       const result = e.data[1];
 
       const dependencyCount = Object.keys(result.packages[""].dependencies ?? {}).length;
-      const tree = createDependencyTree(result, "dependencies", (dependencyNumber, dependencyName) => {
+      const tree = createDependencyGraph(result, "dependencies", (dependencyNumber, dependencyName) => {
         self.postMessage([
           "loadingStatus",
           [
@@ -23,7 +23,7 @@ self.onmessage = async (e: MessageEvent<[string, PackageLock]>) => {
       dependencyCount > 0 && (await new Promise((resolve) => setTimeout(() => resolve(""), 1000)));
 
       const devDependencyCount = Object.keys(result.packages[""].devDependencies ?? {}).length;
-      const devTree = createDependencyTree(result, "devDependencies", (dependencyNumber, dependencyName) => {
+      const devTree = createDependencyGraph(result, "devDependencies", (dependencyNumber, dependencyName) => {
         self.postMessage([
           "loadingStatus",
           [
