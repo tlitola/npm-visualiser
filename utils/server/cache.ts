@@ -1,15 +1,16 @@
-import fsStore from "cache-manager-fs-hash";
 import { caching, Cache } from "cache-manager";
-import { RedisStore, redisStore } from "cache-manager-redis-yet";
-import { RedisClientType } from "redis";
+import fsStore from "cache-manager-fs-hash";
+import redisStore from "cache-manager-redis-store";
 
-export type AppCache = RedisStore<RedisClientType> | Cache;
-
-export const initializeCache = async (): Promise<AppCache> => {
+export const initializeCache = async (): Promise<Cache> => {
   const ttl = 1000 * 60;
 
   const cache = process.env.REDIS_URL
-    ? await redisStore({ url: process.env.REDIS_URL, ttl })
+    ? await caching({
+        store: redisStore,
+        url: process.env.REDIS_URL,
+        ttl,
+      })
     : await caching({
         store: fsStore,
         options: {
@@ -21,16 +22,8 @@ export const initializeCache = async (): Promise<AppCache> => {
   return cache;
 };
 
-export const disconnectCache = async (cache: RedisStore | Cache | undefined) => {
-  //@ts-expect-error Cache has client only if it's of type RedisStore
-  if (cache?.client) {
-    cache = cache as RedisStore;
-    cache.client.isOpen && (await cache.client.disconnect());
-  }
-};
-
 export const withCache = async <T>(
-  cache: AppCache | undefined,
+  cache: Cache | undefined,
   key: string,
   func: () => Promise<T>,
   ttl: number = 1000 * 60,
@@ -45,12 +38,8 @@ export const withCache = async <T>(
   return result;
 };
 
-export const handleWithCache = async <Response>(func: (cache: AppCache) => Response): Promise<Response> => {
+export const handleWithCache = async <Response>(func: (cache: Cache) => Response): Promise<Response> => {
   const cache = await initializeCache();
 
-  try {
-    return await func(cache);
-  } finally {
-    await disconnectCache(cache);
-  }
+  return await func(cache);
 };
