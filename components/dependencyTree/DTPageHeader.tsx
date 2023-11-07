@@ -1,6 +1,5 @@
 import { Row, Col, Stack, Card } from "react-bootstrap";
 import Tag from "../Tag";
-import { NpmPackage, ProjectInfo } from "@/utils/PackageLock";
 import {
   calculateDownloadSize,
   calculateTotalDependencyCount,
@@ -16,32 +15,30 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import { DependencyTreeInterface } from "./LockfileInput";
+import Link from "next/link";
 
 export default function DTPageHeader({
-  project,
   dependencyTree,
   packageInfo,
   vulns,
 }: {
   packageInfo?: Record<string, PackageInfo>;
   vulns?: Record<string, PackageVulnerability[]>;
-  project?: ProjectInfo;
-  dependencyTree: {
-    tree: NpmPackage[];
-    devTree: NpmPackage[];
-    dependencyCount: number;
-  };
+  dependencyTree: DependencyTreeInterface;
 }) {
   return (
     <Row className="mb-4 w-full">
       <Col>
         <Stack direction="horizontal" className="mb-1">
-          <h1 className="my-auto mr-4">{project?.name}</h1>
-          {project?.version && (
-            <Tag className="px-2 py-1  !text-base" params={{ type: "version", version: project?.version }} />
+          <h1 className="my-auto mr-4">{dependencyTree?.name}</h1>
+          {dependencyTree?.version && (
+            <Tag className="px-2 py-1  !text-base" params={{ type: "version", version: dependencyTree?.version }} />
           )}
         </Stack>
-        <h4>Something</h4>
+        <Link href="/" className="text-black ml-1 font-medium">
+          Process another lockfile
+        </Link>
       </Col>
 
       <Col>

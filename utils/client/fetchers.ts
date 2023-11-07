@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { downloadHistory, packageInfo, packageVulnerability } from "../Package";
+import { PackageInfo, PackageVulnerability, downloadHistory, packageInfo, packageVulnerability } from "../Package";
 
-export const fetchPackageInfo = async (name: string, version: string) => {
+export const fetchPackageInfo = async (name: string, version: string): Promise<PackageInfo> => {
   const result = await fetch(`/api/dependency/${name}/${version}`);
   return packageInfo.parse(await result.json());
 };
@@ -11,7 +11,9 @@ export const fetchDownloadsHistory = async (name: string) => {
   return downloadHistory.parse(await result.json());
 };
 
-export const fetchAllPackagesInfo = async (packages: [string, string][]) => {
+export const fetchAllPackagesInfo = async (
+  packages: [string, string][],
+): Promise<Record<string, PackageInfo> | undefined> => {
   if (packages.length === 0) return undefined;
   const result = await Promise.all(
     packages.map(async (el) => {
@@ -26,20 +28,22 @@ export const fetchAllPackagesInfo = async (packages: [string, string][]) => {
   }, {});
 };
 
-export const fetchPackageVulnerabies = async (name: string, version: string) => {
+export const fetchPackageVulnerabilities = async (name: string, version: string): Promise<PackageVulnerability[]> => {
   const result = await fetch(`/api/dependency/vulnerabilities/${name}/${version}`);
   const data = await result.json();
   return z.array(packageVulnerability).parse(data);
 };
 
-export const fetchAllPackagesVulnerabilites = async (packages: [string, string][]) => {
+export const fetchAllPackagesVulnerabilites = async (
+  packages: [string, string][],
+): Promise<Record<string, PackageVulnerability[]> | undefined> => {
   if (packages.length === 0) return undefined;
   const result = await Promise.all(
     packages.map(async (el) => {
       const [name, version] = el;
 
       return {
-        [`${name}@${version}`]: await fetchPackageVulnerabies(name, version),
+        [`${name}@${version}`]: await fetchPackageVulnerabilities(name, version),
       };
     }),
   );

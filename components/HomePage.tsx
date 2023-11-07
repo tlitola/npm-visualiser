@@ -1,23 +1,17 @@
 import Image from "next/image";
-import DragAndDrop from "../DragAndDrop";
-import graphPic from "../../public/images/graph_background.svg";
+import graphPic from "../public/images/graph_background.svg";
 import { Stack } from "react-bootstrap";
 import Link from "next/link";
+import LockfileInput from "./dependencyTree/LockfileInput";
 
-export default function DragAndDropPage({
-  disabled,
-  onFileChange,
-}: {
-  disabled: boolean;
-  onFileChange: (newFile: File, setError: (error?: string) => void) => Promise<void>;
-}) {
+export default function HomePage() {
   return (
     <>
       <section className="min-h-[max(70vh,500px);]  w-screen flex flex-col items-center justify-center relative -mt-16">
         <Image src={graphPic} alt="background graphic" fill={true} className="opacity-[7%]" />
         <h1 className="font-bold text-slate-700">Package-lock visualizer</h1>
         <p className="text-slate-700 font-medium text-xl mb-14">Learn what your project depends on</p>
-        <DragAndDrop disabled={disabled} onFileChange={onFileChange} />
+        <LockfileInput />
       </section>
 
       <section className="bg-slate-700 text-white w-screen py-4 px-14 !rounded-none border-0 flex flex-col items-center">

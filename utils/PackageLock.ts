@@ -1,12 +1,5 @@
 import { z } from "zod";
 
-export const projectInfo = z.object({
-  name: z.string(),
-  version: z.string().optional(),
-});
-
-export type ProjectInfo = z.infer<typeof projectInfo>;
-
 //Zod schemas for handling package tree
 const basePackage = z
   .object({
