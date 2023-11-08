@@ -60,7 +60,18 @@ export default function DragAndDrop({
     window.addEventListener("dragover", startWindowDrag);
     //@ts-expect-error Typings of the windown.addEventListener and DragEventHandler seems to give unnecessary error.
     window.addEventListener("dragleave", stopWindowDrag);
-  });
+
+    return () => {
+      //@ts-expect-error Typings of the windown.addEventListener and DragEventHandler seems to give unnecessary error.
+      window.removeEventListener("dragenter", startWindowDrag);
+      //@ts-expect-error Typings of the windown.removeEventListener and DragEventHandler seems to give unnecessary error.
+      window.removeEventListener("drop", stopWindowDrag);
+      //@ts-expect-error Typings of the windown.removeEventListener and DragEventHandler seems to give unnecessary error.
+      window.removeEventListener("dragover", startWindowDrag);
+      //@ts-expect-error Typings of the windown.removeEventListener and DragEventHandler seems to give unnecessary error.
+      window.removeEventListener("dragleave", stopWindowDrag);
+    };
+  }, []);
 
   return (
     <>
