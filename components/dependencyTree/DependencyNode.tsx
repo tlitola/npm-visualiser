@@ -36,19 +36,19 @@ export default function DependencyNode({
 
     nodeRef.current.scrollIntoView();
 
-    nodeRef.current?.classList.add("animate-highlight");
+    nodeRef.current?.classList.add("tw-animate-highlight");
     await new Promise((resolve) =>
       setTimeout(() => {
         resolve(undefined);
       }, 1500),
     );
-    nodeRef.current?.classList.remove("animate-highlight");
+    nodeRef.current?.classList.remove("tw-animate-highlight");
   };
 
   return (
     <>
       <span
-        className="tw-flex tw-items-center tw-justify-start tw-p-1 tw-w-full tw-cursor-pointer hover:tw-bg-gray-100 tw-rounded"
+        className="tw-flex tw-items-center tw-justify-start tw-p-1 tw-w-fit tw-cursor-pointer hover:tw-bg-gray-100 tw-rounded"
         ref={nodeRef}
         onClick={() => setShowModal(true)}
       >
@@ -67,7 +67,8 @@ export default function DependencyNode({
           {dependency.cyclic && (
             <Tag
               params={{ type: "circular" }}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 parents[`${dependency.name}-${dependency.version}`]();
               }}
             />
