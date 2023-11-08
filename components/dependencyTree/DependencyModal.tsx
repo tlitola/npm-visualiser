@@ -37,31 +37,35 @@ export default function DepepndencyModal({
   const baseLink = "https://www.npmjs.com/package/";
   return (
     <Modal size="lg" show={show} onHide={hide}>
-      <Modal.Header className="flex flex-col !place-items-start px-4 pt-4">
-        <Modal.Title className="!text-3xl">
+      <Modal.Header className="tw-flex tw-flex-col !tw-place-items-start tw-px-4 tw-pt-4">
+        <Modal.Title className="!tw-text-3xl">
           {dependency.name}
-          <Tag className="ml-4 p-2" params={{ type: "version", version: dependency.version ?? "" }} />
+          <Tag className="tw-ml-4 !tw-p-2" params={{ type: "version", version: dependency.version ?? "" }} />
         </Modal.Title>
-        <Stack direction="horizontal" gap={3} className="mt-2">
+        <Stack direction="horizontal" gap={3} className="tw-mt-2">
           {info?.homepage && (
-            <Link href={info?.homepage} target="_blank" className="text-black hover:!text-gray-600">
-              <FontAwesomeIcon icon={faHome} className="h-6" title="Homepage" />
+            <Link href={info?.homepage} target="_blank" className="tw-text-black hover:!tw-text-gray-600">
+              <FontAwesomeIcon icon={faHome} className="tw-h-6" title="Homepage" />
             </Link>
           )}
           {info?.repository && (
-            <Link href={info?.repository.split("git+")[1]} target="_blank" className="text-black hover:!text-gray-600">
-              <FontAwesomeIcon icon={faGithub} className="h-6" title="Repository" />
+            <Link
+              href={info?.repository.split("git+")[1]}
+              target="_blank"
+              className="tw-text-black hover:!tw-text-gray-600"
+            >
+              <FontAwesomeIcon icon={faGithub} className="tw-h-6" title="Repository" />
             </Link>
           )}
-          <Link href={baseLink + dependency.name} target="_blank" className="text-black hover:!text-gray-600">
-            <FontAwesomeIcon icon={faNpm} className="h-6" title="Homepage" />
+          <Link href={baseLink + dependency.name} target="_blank" className="tw-text-black hover:!tw-text-gray-600">
+            <FontAwesomeIcon icon={faNpm} className="tw-h-6" title="Homepage" />
           </Link>
         </Stack>
-        <CloseButton className="absolute right-6 top-6" onClick={hide} />
+        <CloseButton className="tw-absolute tw-right-6 tw-top-6" onClick={hide} />
       </Modal.Header>
-      <Modal.Body className="px-4 pb-4">
+      <Modal.Body className="tw-px-4 tw-pb-4">
         <Row>
-          <Col sm={7} className="border-r-[1px] border-r-gray-200">
+          <Col sm={7} className="tw-border-r-[1px] tw-border-r-gray-200">
             <ModalTitle>Description</ModalTitle>
             <p>{info?.description}</p>
             <ModalTitle>Dependencies</ModalTitle>
@@ -71,25 +75,29 @@ export default function DepepndencyModal({
               <Accordion flush>
                 {sortBySeverity(vulns)?.map((el, i) => (
                   <Accordion.Item key={el.id} eventKey={i.toString()}>
-                    <Stack key={el.name} direction="horizontal" className="justify-between w-full items-center">
-                      <p className="my-auto">{el.id}</p>
+                    <Stack
+                      key={el.name}
+                      direction="horizontal"
+                      className="tw-justify-between tw-w-full tw-items-center"
+                    >
+                      <p className="tw-my-auto">{el.id}</p>
                       <Stack direction="horizontal">
                         {el?.severity?.text && (
                           <p
                             className={`bg-vuln-${
                               el.severity?.text ?? "Unknown"
-                            } py-[1px] px-2 rounded-lg my-auto mr-4`}
+                            } tw-py-[1px] tw-px-2 tw-rounded-lg tw-my-auto tw-mr-4`}
                           >
                             {capitalizeFirst(el.severity?.text)}
                           </p>
                         )}
-                        <Accordion.Button className="w-auto shadow-none bg-transparent p-0" />
+                        <Accordion.Button className="tw-w-auto !tw-shadow-none !tw-bg-transparent tw-p-0" />
                       </Stack>
                     </Stack>
-                    <Accordion.Body className="pt-1">
+                    <Accordion.Body className="tw-pt-1">
                       {el.to && (
-                        <p className="mb-1">
-                          <b className="text-gray-700">Affected versions:</b>{" "}
+                        <p className="tw-mb-1">
+                          <b className="tw-text-gray-700">Affected versions:</b>{" "}
                           {el.from && (
                             <span title={el.from === "0" ? "The exact introduced commit is unknown" : ""}>
                               {el.from} -{" "}
@@ -98,7 +106,7 @@ export default function DepepndencyModal({
                           {el.to}
                         </p>
                       )}
-                      <p className="break-words">{el.details}</p>
+                      <p className="tw-break-words">{el.details}</p>
                     </Accordion.Body>
                   </Accordion.Item>
                 ))}
@@ -107,8 +115,8 @@ export default function DepepndencyModal({
           </Col>
           <Col sm={5}>
             <ModalTitle>{(downloads ?? defaultDownloads)[0]}</ModalTitle>
-            <Stack direction={"horizontal"} className="border-b-[1px] h-[50px] border-b-gray-200 !mb-4">
-              <p className="mr-4 mt-auto mb-0 font-medium w-2/5">
+            <Stack direction={"horizontal"} className="tw-border-b-[1px] tw-h-[50px] tw-border-b-gray-200 !tw-mb-4">
+              <p className="tw-mr-4 tw-mt-auto tw-mb-0 tw-font-medium tw-w-2/5">
                 {(downloads ?? defaultDownloads)[1]?.toLocaleString("en")}
               </p>
               <DownloadsChart packageName={dependency.name ?? ""} updateValue={setDownloads} />
@@ -126,10 +134,10 @@ export default function DepepndencyModal({
           </Col>
         </Row>
       </Modal.Body>
-      <Modal.Footer className="!justify-start !py-1">
+      <Modal.Footer className="!tw-justify-start !tw-py-1">
         <i>
           Vulnerability data is sourced from{" "}
-          <Link className="text-black" href={"https://osv.dev/"} target="_blank">
+          <Link className="tw-text-black" href={"https://osv.dev/"} target="_blank">
             OSV API
           </Link>
         </i>
@@ -139,5 +147,5 @@ export default function DepepndencyModal({
 }
 
 function ModalTitle({ children }: PropsWithChildren) {
-  return <h6 className="text-gray-700 mb-1">{children}</h6>;
+  return <h6 className="tw-text-gray-700 tw-mb-1">{children}</h6>;
 }

@@ -66,16 +66,18 @@ export default function DragAndDrop({
     <>
       <div
         className={`${
-          !dragging && "hidden "
-        } z-0 transition-all  bg-black h-screen w-screen fixed top-0 left-0  opacity-20 ${
-          droppable && "opacity-10"
-        } pointer-events-none`}
+          !dragging && "tw-hidden "
+        } tw-z-0 tw-transition-all tw-bg-black tw-h-screen tw-w-screen tw-fixed tw-top-0 tw-left-0 tw-opacity-20 ${
+          droppable && "tw-opacity-10"
+        } tw-pointer-events-none`}
       />
       <Card
         border={`${error ? "danger" : !droppable ? "secondary" : "info"}`}
-        className={`mx-auto w-3/5 ${error ? "!bg-rose-100" : droppable ? "!bg-blue-100" : "!bg-white"} border-2 ${
-          !droppable ? (dragging ? "!border-dashed" : "border-transparent") : "border-solid"
-        } transition-all box-border shadow p-3`}
+        className={`tw-mx-auto tw-w-3/5 ${
+          error ? "!tw-bg-rose-100" : droppable ? "!tw-bg-blue-100" : "!tw-bg-white"
+        } tw-border-2 ${
+          !droppable ? (dragging ? "!tw-border-dashed" : "border-transparent") : "!tw-border-solid"
+        } tw-transition-all tw-box-border tw-shadow tw-p-3`}
         onDragEnter={startDrag}
         onDragLeave={stopDrag}
         onDrop={handleDrop}
@@ -84,17 +86,17 @@ export default function DragAndDrop({
           startWindowDrag(e);
         }}
       >
-        <CardBody className="text-center !space-y-3">
+        <CardBody className="tw-text-center !tw-space-y-3">
           {/* The icon seems to cause shifting*/}
-          <FontAwesomeIcon icon={faFileArrowDown} className={`w-24 h-24 m-auto`} />
-          <CardTitle className={`${droppable && "!text-blue-600"} text-center m-0 transition-all`}>{`${
+          <FontAwesomeIcon icon={faFileArrowDown} className={`tw-w-24 tw-h-24 tw-m-auto`} />
+          <CardTitle className={`${droppable && "!tw-text-blue-600"} tw-text-center tw-m-0 tw-transition-all`}>{`${
             !droppable ? "Drag and " : ""
           }Drop here to start`}</CardTitle>
-          <CardText className={`${droppable && "text-blue-600"} text-center m-0`}>or</CardText>
+          <CardText className={`${droppable && "tw-text-blue-600"} tw-text-center m-0`}>or</CardText>
 
-          <input accept=".json" ref={fileInputRef} type="file" className="hidden" onChange={handleFileSubmit} />
+          <input accept=".json" ref={fileInputRef} type="file" className="tw-hidden" onChange={handleFileSubmit} />
           <Button
-            className="!font-semibold"
+            className="!tw-font-semibold"
             disabled={disabled || (!error && droppable)}
             onClick={() => {
               fileInputRef.current?.click();
@@ -102,7 +104,7 @@ export default function DragAndDrop({
           >
             Choose a File
           </Button>
-          <p className={`${!error && "hidden"} m-0 text-red-700`}>
+          <p className={`${!error && "tw-hidden"} tw-m-0 tw-text-red-700`}>
             <FontAwesomeIcon icon={faCircleExclamation} /> {error}
           </p>
         </CardBody>

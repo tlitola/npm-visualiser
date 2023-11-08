@@ -52,7 +52,7 @@ export function DownloadsChart({
           fillOpacity={1}
           fill="url(#fill)"
         />
-        <Tooltip wrapperClassName="hidden" />
+        <Tooltip wrapperClassName="tw-hidden" />
       </AreaChart>
     </ResponsiveContainer>
   );

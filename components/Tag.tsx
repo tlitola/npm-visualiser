@@ -34,7 +34,7 @@ export default function Tag({
           bg="emerald"
           text="dark"
           role="button"
-          className="hover:!text-gray-500"
+          className="hover:!tw-text-gray-500"
           title="This dependency creates a circular loop. Click here to go back to last instance of it"
         >
           <FontAwesomeIcon icon={faRotateBack} />

@@ -25,14 +25,14 @@ export default function DependencyTreePage() {
   return dependencyTree ? (
     <>
       <DTPageHeader vulns={vulns} packageInfo={packageInfo} dependencyTree={dependencyTree} />
-      <Row className="w-full h-full overflow-y-scroll p-2 py-0 rounded-sm shadow content-start scroll-pt-24 scroll-smooth">
-        <Tabs defaultActiveKey={"dependencies"} className="sticky top-0 bg-white h-fit">
+      <Row className="tw-w-full tw-h-full tw-overflow-y-scroll tw-p-2 tw-py-0 tw-rounded-sm tw-shadow tw-content-start tw-scroll-pt-24 tw-scroll-smooth">
+        <Tabs defaultActiveKey={"dependencies"} className="tw-sticky tw-top-0 tw-bg-white tw-h-fit">
           <Tab
             eventKey={"dependencies"}
             title={
               <p
                 title={dependencyTree.tree.length === 0 ? "Lockfile provided does not contain any dependencies" : ""}
-                className={`m-0 ${dependencyTree.tree.length === 0 && "text-gray-500"}`}
+                className={`tw-m-0 ${dependencyTree.tree.length === 0 && "tw-text-gray-500"}`}
               >
                 Dependencies
               </p>
@@ -50,7 +50,7 @@ export default function DependencyTreePage() {
             title={
               <p
                 title={dependencyTree.devTree.length === 0 ? "Lockfile provided does not contain any dependencies" : ""}
-                className={`m-0 ${dependencyTree.devTree.length === 0 && "text-gray-500"}`}
+                className={`tw-m-0 ${dependencyTree.devTree.length === 0 && "tw-text-gray-500"}`}
               >
                 Dev Dependencies
               </p>

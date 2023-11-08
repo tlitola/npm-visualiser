@@ -88,19 +88,17 @@ export default function LockfileInput() {
                 message: "Complete\n ",
               }));
 
-              setTimeout(async () => {
-                await setDependencyTree({
-                  name: lockFile.name,
-                  version: lockFile.version,
-                  tree,
-                  devTree,
-                  dependencyCount: count,
-                });
-                setError("");
-                router.push("/report");
-              }, 1000);
-
               worker.terminate();
+
+              setDependencyTree({
+                name: lockFile.name,
+                version: lockFile.version,
+                tree,
+                devTree,
+                dependencyCount: count,
+              });
+              setError("");
+              router.push("/report");
 
               break;
 
@@ -132,12 +130,14 @@ export default function LockfileInput() {
       <DragAndDrop disabled={loadingStatus.isLoading} onFileChange={updateDependencyTree} />;
       {loadingStatus.isLoading && (
         <>
-          <div className={` z-0 transition-all  bg-black h-screen w-screen fixed top-0 left-0 opacity-40 `} />
-          <Card className="!h-1/2 flex flex-col items-center justify-center !fixed top-1/2 -translate-y-1/2 px-12 w-5/6">
-            <h2 className="w-[333px] font-bold text-slate-700 after:inline-block after:content-['…'] after:align-bottom after:overflow-hidden after:w-0 after:animate-dots">
+          <div
+            className={`tw-z-0 tw-transition-all tw-bg-black tw-h-screen tw-w-screen tw-fixed tw-top-0 tw-left-0 tw-opacity-40 `}
+          />
+          <Card className="!tw-h-1/2 tw-flex tw-flex-col tw-items-center tw-justify-center !tw-fixed tw-top-1/2 -tw-translate-y-1/2 tw-px-12 tw-w-5/6">
+            <h2 className="tw-w-[333px] tw-font-bold tw-text-slate-700 after:tw-inline-block after:tw-content-['…'] after:tw-align-bottom after:tw-overflow-hidden after:tw-w-0 after:tw-animate-dots">
               Parsing the lockfile
             </h2>
-            <p className="text-slate-700 font-medium text-xl mb-12">This should only take a few seconds</p>
+            <p className="tw-text-slate-700 tw-font-medium tw-text-xl tw-mb-12">This should only take a few seconds</p>
             <Loading
               statusText={loadingStatus.message}
               step={loadingStatus.step}

@@ -48,19 +48,19 @@ export default function DependencyNode({
   return (
     <>
       <span
-        className="flex items-center justify-start p-1 w-full cursor-pointer hover:bg-gray-100 rounded"
+        className="tw-flex tw-items-center tw-justify-start tw-p-1 tw-w-full tw-cursor-pointer hover:tw-bg-gray-100 tw-rounded"
         ref={nodeRef}
         onClick={() => setShowModal(true)}
       >
         <Link
           href={`${baseLink}${dependency.name}`}
           target="_blank"
-          className="!mr-2 my-0 ml-0 text-black no-underline peer"
+          className="!tw-mr-2 tw-my-0 tw-ml-0 tw-text-black tw-no-underline tw-peer"
           onClick={(e) => e.stopPropagation()}
         >
           {dependency.name}
         </Link>
-        <FontAwesomeIcon className="mr-2 h-3 hidden peer-hover:block" icon={faArrowUpRightFromSquare} />
+        <FontAwesomeIcon className="tw-mr-2 tw-h-3 tw-hidden peer-hover:tw-block" icon={faArrowUpRightFromSquare} />
 
         <Stack direction="horizontal" gap={2}>
           <Tag params={{ type: "version", version: dependency.version ?? "" }} />
@@ -94,7 +94,7 @@ export default function DependencyNode({
 
         {(!dependency.dependencies || dependency.dependencies?.length > 0) && !dependency.cyclic && (
           <FontAwesomeIcon
-            className="ml-3 select-none text-gray-500 hover:text-black"
+            className="tw-ml-3 tw-select-none tw-text-gray-500 hover:tw-text-black"
             role="button"
             onClick={(e) => {
               e.stopPropagation();
@@ -107,7 +107,7 @@ export default function DependencyNode({
       {open && dependency.dependencies && (
         <section
           style={{ marginLeft: 16 * depth }}
-          className={`flex flex-col items-start min-w-[calc(100% - ${16 * depth}px)]`}
+          className={`tw-flex tw-flex-col tw-items-start tw-min-w-[calc(100% - ${16 * depth}px)]`}
         >
           {dependency.dependencies.map((el) => (
             <DependencyNode

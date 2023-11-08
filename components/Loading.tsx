@@ -14,26 +14,31 @@ export default function Loading({
   now: number;
 }) {
   return (
-    <div className="w-full">
-      <div className="flex items-center w-full">
+    <div className="tw-w-full">
+      <div className="tw-flex tw-items-center tw-w-full">
         {steps.map((el, i) => (
           <Step label={el} now={i > step ? 0 : step === i ? now : 100} key={el} done={now > 100 || step > i} />
         ))}
       </div>
-      <p className="text-center w-full mt-12 mb-0 text-slate-700 text-lg font-medium whitespace-pre">{statusText}</p>
+      <p className="tw-text-center tw-w-full tw-mt-12 tw-mb-0 tw-text-slate-700 tw-text-lg tw-font-medium tw-whitespace-pre">
+        {statusText}
+      </p>
     </div>
   );
 }
 
 function Step({ now, label, done }: { now: number; label: string; done: boolean }) {
   return (
-    <div className="flex items-center w-full h-fit">
-      <ProgressBar max={100} now={now} variant="success" className="w-full !h-1 " />
-      <div className="relative">
-        <div className="h-12 w-12 border-emerald-700 border-4 rounded-full grid place-items-center box-border m-1">
-          <FontAwesomeIcon icon={faCheck} className={`${!done ? "scale-0" : "scale-100"}  text-emerald-700 w-8 h-8`} />
+    <div className="tw-flex tw-items-center tw-w-full tw-h-fit">
+      <ProgressBar max={100} now={now} variant="success" className="tw-w-full !tw-h-1 " />
+      <div className="tw-relative">
+        <div className="tw-h-12 tw-w-12 tw-border-solid tw-border-emerald-700 tw-border-4 tw-rounded-full tw-grid tw-place-items-center tw-box-border tw-m-1">
+          <FontAwesomeIcon
+            icon={faCheck}
+            className={`${!done ? "tw-scale-0" : "tw-scale-100"} tw-text-emerald-700 tw-w-8 tw-h-8`}
+          />
         </div>
-        <p className="absolute left-1/2 -translate-x-1/2 text-center leading-7 font-medium text-slate-700 text-lg">
+        <p className="tw-absolute tw-left-1/2 -tw-translate-x-1/2 tw-text-center tw-leading-7 tw-font-medium tw-text-slate-700 tw-text-lg">
           {label}
         </p>
       </div>
