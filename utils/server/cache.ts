@@ -3,7 +3,7 @@ import fsStore from "cache-manager-fs-hash";
 import redisStore from "cache-manager-redis-store";
 
 export const initializeCache = async (): Promise<Cache> => {
-  const ttl = 1000 * 60;
+  const ttl = 60 * 60;
 
   const cache = process.env.REDIS_URL
     ? await caching({
