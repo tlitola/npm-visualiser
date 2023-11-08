@@ -127,7 +127,7 @@ export default function LockfileInput() {
 
   return (
     <>
-      <DragAndDrop disabled={loadingStatus.isLoading} onFileChange={updateDependencyTree} />;
+      <DragAndDrop disabled={loadingStatus.isLoading} onFileChange={updateDependencyTree} />
       {loadingStatus.isLoading && (
         <>
           <div

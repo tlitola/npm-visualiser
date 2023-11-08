@@ -8,7 +8,15 @@ export default function HomePage() {
   return (
     <>
       <section className="tw-min-h-[max(70vh,500px);] tw-w-screen tw-flex tw-flex-col tw-items-center tw-justify-center tw-relative -tw-mt-16">
-        <Image src={graphPic} alt="background graphic" fill={true} className="tw-opacity-[7%] tw-pointer-events-none" />
+        <Image
+          src={graphPic}
+          alt="background graphic"
+          fill={true}
+          style={{ objectFit: "cover" }}
+          priority
+          className="tw-opacity-[7%] tw-pointer-events-none"
+        />
+
         <h1 className="tw-font-bold tw-text-slate-700">Package-lock visualizer</h1>
         <p className="tw-text-slate-700 tw-font-medium tw-text-xl tw-mb-14">Learn what your project depends on</p>
         <LockfileInput />
