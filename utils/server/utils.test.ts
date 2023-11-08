@@ -6,7 +6,7 @@ import { npmDownloadsResponse } from "./packageInfoFetcher";
 describe("getNpmDateRange", () => {
   test("Returns right string", () => {
     //Oct 14 2023
-    const date = new Date(1697230800000);
+    const date = new Date("2023-10-14T00:00:00");
     expect(getNpmDateRange(date)).toEqual("2022-10-15:2023-10-14");
   });
 });
