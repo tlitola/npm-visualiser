@@ -10,7 +10,6 @@ COPY . .
 
 RUN npm run build
 
-
 FROM node:18.15.0-alpine as prod
 
 WORKDIR /app
