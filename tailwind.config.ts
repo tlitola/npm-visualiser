@@ -31,7 +31,7 @@ const config: Config = {
         },
         dots: {
           to: {
-            width: "40px",
+            width: "30px",
           },
         },
       },

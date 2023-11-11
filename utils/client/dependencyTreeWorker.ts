@@ -20,7 +20,7 @@ self.onmessage = async (e: MessageEvent<[string, PackageLock]>) => {
       });
 
       //Rest to allow the loading animation time to catch up
-      await new Promise((resolve) => setTimeout(() => resolve(""), 1000));
+      dependencyCount > 0 && (await new Promise((resolve) => setTimeout(() => resolve(""), 1000)));
 
       const devDependencyCount = Object.keys(result.packages[""].devDependencies ?? {}).length;
       const devTree = createDependencyTree(result, "devDependencies", (dependencyNumber, dependencyName) => {
@@ -35,7 +35,7 @@ self.onmessage = async (e: MessageEvent<[string, PackageLock]>) => {
       });
 
       //Rest to allow the loading animation time to catch up
-      await new Promise((resolve) => setTimeout(() => resolve(""), 1000));
+      devDependencyCount > 0 && (await new Promise((resolve) => setTimeout(() => resolve(""), 1000)));
 
       self.postMessage([
         "complete",
