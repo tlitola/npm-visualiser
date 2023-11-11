@@ -25,9 +25,9 @@ primary_region = "ams"
   processes = ["app"]
 
   [http_service.concurrency]
-    type = "connections"
-    soft_limit = 20
-    hard_limit = 25
+    type = "requests"
+    soft_limit = 75
+    hard_limit = 100
 
   [[http_service.checks]]
     grace_period = "1s"
