@@ -3,13 +3,14 @@
 import { NpmPackage } from "@/utils/PackageLock";
 import { readLockFile } from "@/utils/client/parser";
 import { LoadingStatusUpdate, ParseCompleteMessage, loadingStatusUpdate } from "@/utils/protocol";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import DragAndDrop from "../DragAndDrop";
 import { Card } from "react-bootstrap";
 import Loading from "../Loading";
 import useSWRMutation from "swr/mutation";
 import { useRouter } from "next/navigation";
+import { useSWRConfig } from "swr";
 
 export interface DependencyTreeInterface {
   name: string | undefined;
@@ -20,11 +21,18 @@ export interface DependencyTreeInterface {
 }
 
 export default function LockfileInput() {
+  const { mutate } = useSWRConfig();
+
   const { trigger: setDependencyTree } = useSWRMutation(
     "dependencyTree",
     (_key, { arg }: { arg: DependencyTreeInterface }) => arg,
     { populateCache: true },
   );
+
+  useEffect(() => {
+    mutate("packageInfo", null);
+    mutate("packageVulnerability", null);
+  }, [mutate]);
 
   const [loadingStatus, setLoadingStatus] = useState<{
     isLoading: boolean;
