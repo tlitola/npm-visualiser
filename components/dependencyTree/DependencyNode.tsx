@@ -48,12 +48,14 @@ export default function DependencyNode({
   return (
     <>
       <span
-        className="tw-flex tw-items-center tw-justify-start tw-p-1 tw-w-fit tw-cursor-pointer hover:tw-bg-gray-100 tw-rounded"
+        className="tw-flex tw-items-center tw-justify-start tw-p-1 tw-w-full tw-cursor-pointer hover:tw-bg-gray-100 tw-rounded"
         ref={nodeRef}
-        onClick={() => setShowModal(true)}
+        onClick={() => {
+          setShowModal(true);
+        }}
       >
         <Link
-          href={`${baseLink}${dependency.name}`}
+          href={`${baseLink}${dependency.name ?? ""}`}
           target="_blank"
           className="!tw-mr-2 tw-my-0 tw-ml-0 tw-text-black tw-no-underline tw-peer"
           onClick={(e) => e.stopPropagation()}
@@ -107,8 +109,8 @@ export default function DependencyNode({
       </span>
       {open && dependency.dependencies && (
         <section
-          style={{ marginLeft: 16 * depth }}
-          className={`tw-flex tw-flex-col tw-items-start tw-min-w-[calc(100% - ${16 * depth}px)]`}
+          style={{ marginLeft: 16 * depth, minWidth: `calc(100% - ${16 * depth}px` }}
+          className={`tw-flex tw-flex-col tw-items-start`}
         >
           {dependency.dependencies.map((el) => (
             <DependencyNode
