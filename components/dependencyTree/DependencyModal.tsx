@@ -50,14 +50,18 @@ export default function DepepndencyModal({
           )}
           {info?.repository && (
             <Link
-              href={info?.repository.split("git+")[1]}
+              href={info?.repository.replace("git+", "").replace("git://", "")}
               target="_blank"
               className="tw-text-black hover:!tw-text-gray-600"
             >
               <FontAwesomeIcon icon={faGithub} className="tw-h-6" title="Repository" />
             </Link>
           )}
-          <Link href={baseLink + dependency.name} target="_blank" className="tw-text-black hover:!tw-text-gray-600">
+          <Link
+            href={baseLink + dependency.name ?? ""}
+            target="_blank"
+            className="tw-text-black hover:!tw-text-gray-600"
+          >
             <FontAwesomeIcon icon={faNpm} className="tw-h-6" title="Homepage" />
           </Link>
         </Stack>
@@ -114,11 +118,9 @@ export default function DepepndencyModal({
             </div>
           </Col>
           <Col sm={5}>
-            <ModalTitle>{(downloads ?? defaultDownloads)[0]}</ModalTitle>
+            <ModalTitle>{downloads[0]}</ModalTitle>
             <Stack direction={"horizontal"} className="tw-border-b-[1px] tw-h-[50px] tw-border-b-gray-200 !tw-mb-4">
-              <p className="tw-mr-4 tw-mt-auto tw-mb-0 tw-font-medium tw-w-2/5">
-                {(downloads ?? defaultDownloads)[1]?.toLocaleString("en")}
-              </p>
+              <p className="tw-mr-4 tw-mt-auto tw-mb-0 tw-font-medium tw-w-1/2">{downloads[1]?.toLocaleString("en")}</p>
               <DownloadsChart packageName={dependency.name ?? ""} updateValue={setDownloads} />
             </Stack>
             <Row>
