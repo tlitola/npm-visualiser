@@ -101,7 +101,7 @@ export default class PackageInfoFetcher {
 
         return data.data;
       },
-      1000 * 60 * 60,
+      24 * 60 * 60,
     );
   }
 
@@ -120,7 +120,7 @@ export default class PackageInfoFetcher {
 
         return data.data;
       },
-      1000 * 60 * 60,
+      24 * 60 * 60,
     );
   }
 
@@ -141,7 +141,7 @@ export default class PackageInfoFetcher {
 
         return data.data;
       },
-      1000 * 60 * 60,
+      24 * 60 * 60,
     );
   }
 
@@ -174,7 +174,7 @@ export default class PackageInfoFetcher {
 
         return data.data;
       },
-      1000 * 60 * 60,
+      60 * 60,
     );
   }
 
@@ -264,7 +264,7 @@ export default class PackageInfoFetcher {
     return await this.limiter(() => fetch(url, init));
   }
 
-  async withCache<T>(key: string, func: () => Promise<T>, ttl: number = 1000 * 60) {
+  async withCache<T>(key: string, func: () => Promise<T>, ttl: number = 60 * 60) {
     return withCache(this.cache, key, func, ttl);
   }
 }
