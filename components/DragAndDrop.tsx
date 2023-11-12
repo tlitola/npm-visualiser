@@ -7,9 +7,11 @@ import { Button, Card, CardBody, CardText, CardTitle } from "react-bootstrap";
 export default function DragAndDrop({
   onFileChange,
   disabled,
+  className,
 }: {
   disabled: boolean;
   onFileChange: (file: File, setError: (error?: string) => void) => void;
+  className?: string;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -88,7 +90,7 @@ export default function DragAndDrop({
           error ? "!tw-bg-rose-100" : droppable ? "!tw-bg-blue-100" : "!tw-bg-white"
         } tw-border-2 ${
           !droppable ? (dragging ? "!tw-border-dashed" : "border-transparent") : "!tw-border-solid"
-        } tw-transition-all tw-box-border tw-shadow tw-p-3`}
+        } tw-transition-all tw-box-border tw-shadow tw-p-3 ${className}`}
         onDragEnter={startDrag}
         onDragLeave={stopDrag}
         onDrop={handleDrop}

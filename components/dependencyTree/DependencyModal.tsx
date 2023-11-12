@@ -67,7 +67,7 @@ export default function DepepndencyModal({
         </Stack>
         <CloseButton className="tw-absolute tw-right-6 tw-top-6" onClick={hide} />
       </Modal.Header>
-      <Modal.Body className="tw-px-4 tw-pb-4">
+      <Modal.Body className="tw-px-4 tw-pb-4 tw-overflow-scroll tw-max-h-[calc(94vh-41px-110px)]">
         <Row>
           <Col sm={7} className="tw-border-r-[1px] tw-border-r-gray-200">
             <ModalTitle>Description</ModalTitle>
