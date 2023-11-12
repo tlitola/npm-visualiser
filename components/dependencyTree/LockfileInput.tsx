@@ -135,7 +135,18 @@ export default function LockfileInput() {
 
   return (
     <>
-      <DragAndDrop disabled={loadingStatus.isLoading} onFileChange={updateDependencyTree} />
+      <div className="tw-w-screen tw-relative">
+        <DragAndDrop disabled={loadingStatus.isLoading} onFileChange={updateDependencyTree} className="tw-pb-6" />
+        <p
+          onClick={() => {
+            const file = new File([JSON.stringify(packageLockV3)], "package-lock.json", { type: "application/json" });
+            updateDependencyTree(file, () => {});
+          }}
+          className="tw-italic tw-font-light tw-absolute -tw-bottom-2 tw-right-1/2 tw-translate-x-1/2 tw-cursor-pointer tw-text-gray-500 tw-underline hover:tw-text-gray-700"
+        >
+          Use example lockfile
+        </p>
+      </div>
       {loadingStatus.isLoading && (
         <>
           <div
