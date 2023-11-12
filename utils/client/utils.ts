@@ -38,6 +38,34 @@ export const getPackageNameAndVersion = ({
   ...((devTree ?? []).map((el) => [el.name ?? "", el.version ?? ""]) as [string, string][]),
 ];
 
+export const getDependencyNamesAndVersions = ({
+  tree,
+  devTree,
+}: {
+  tree?: NpmPackage[];
+  devTree?: NpmPackage[];
+}): [string, string][] => {
+  const dependencies = new Map<string, NpmPackage>();
+  tree?.forEach((el) => getAllDependencies(el).forEach((dep) => dependencies.set(`${dep.name}@${dep.version}`, dep)));
+  devTree?.forEach((el) =>
+    getAllDependencies(el).forEach((dep) => dependencies.set(`${dep.name}@${dep.version}`, dep)),
+  );
+
+  const result: [string, string][] = [];
+  dependencies.forEach((value) => {
+    result.push([value.name ?? "", value.version ?? ""]);
+  });
+
+  return result;
+};
+
+const getAllDependencies = (dependency: NpmPackage): NpmPackage[] => {
+  if (dependency.dependencies && dependency.dependencies?.length === 0) return [dependency];
+  return [dependency].concat(
+    (dependency.dependencies ?? []).reduce((acc, el) => acc.concat(getAllDependencies(el)), [] as NpmPackage[]),
+  );
+};
+
 export const findWorstVuln = (vulns: Record<string, PackageVulnerability[]>) => {
   const text = Object.values(vulns).reduce(
     (acc, el) => {

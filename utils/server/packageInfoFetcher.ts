@@ -40,7 +40,7 @@ const osvVulnerabilityResponse = z.object({
       z
         .object({
           id: z.string(),
-          summary: z.string(),
+          summary: z.string().optional(),
           details: z.string(),
           published: z.string(),
           modified: z.string(),
@@ -81,7 +81,7 @@ export default class PackageInfoFetcher {
   private readonly limiter: LimitFunction;
   private readonly cache?: Cache;
   constructor(cache?: Cache) {
-    this.limiter = pLimit(5);
+    this.limiter = pLimit(50);
     this.cache = cache;
   }
 
@@ -159,6 +159,7 @@ export default class PackageInfoFetcher {
             version,
             package: {
               name: packageName,
+              ecosystem: "npm",
             },
           }),
         });

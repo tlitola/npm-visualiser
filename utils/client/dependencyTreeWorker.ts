@@ -37,10 +37,7 @@ self.onmessage = async (e: MessageEvent<[string, PackageLock]>) => {
       //Rest to allow the loading animation time to catch up
       devDependencyCount > 0 && (await new Promise((resolve) => setTimeout(() => resolve(""), 1000)));
 
-      self.postMessage([
-        "complete",
-        [tree, devTree, Object.keys(result.packages).length - 1] satisfies ParseCompleteMessage,
-      ]);
+      self.postMessage(["complete", [tree, devTree] satisfies ParseCompleteMessage]);
       break;
 
     default:

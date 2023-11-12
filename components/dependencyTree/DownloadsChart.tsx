@@ -1,5 +1,6 @@
+"use client";
 import { fetchDownloadsHistory } from "@/utils/client/fetchers";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip } from "recharts";
 import { CategoricalChartState } from "recharts/types/chart/generateCategoricalChart";
 import useSWR from "swr";
@@ -9,24 +10,30 @@ export function DownloadsChart({
   updateValue,
 }: {
   packageName: string;
-  updateValue?: Dispatch<SetStateAction<[string, number] | undefined>>;
+  updateValue?: Dispatch<SetStateAction<[string, number]>>;
 }) {
   const { data: downloads } = useSWR(`download-history-${packageName}`, () => fetchDownloadsHistory(packageName), {
     revalidateOnFocus: false,
   });
 
+  useEffect(() => {
+    if (downloads) {
+      updateValue && updateValue(["Weekly downloads", downloads.downloads.at(-1)?.downloads ?? 0]);
+    }
+  }, [downloads, updateValue]);
+
   const handleMouseMove = (e: CategoricalChartState) => {
     if (!updateValue) return;
     if (!e.activePayload?.at(0)?.payload) {
-      updateValue(undefined);
+      downloads && updateValue(["Weekly downloads", downloads.downloads.at(-1)?.downloads ?? 0]);
       return;
     }
-    const { week, downloads } = e.activePayload?.at(0)?.payload;
-    updateValue([week, downloads]);
+    const { week, downloads: week_downloads } = e.activePayload?.at(0)?.payload;
+    updateValue([week, week_downloads]);
   };
 
   const handleMouseLeave = () => {
-    updateValue && updateValue(undefined);
+    downloads && updateValue && updateValue(["Weekly downloads", downloads.downloads.at(-1)?.downloads ?? 0]);
   };
   return (
     <ResponsiveContainer height={50}>

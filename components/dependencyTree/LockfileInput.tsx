@@ -11,6 +11,8 @@ import Loading from "../Loading";
 import useSWRMutation from "swr/mutation";
 import { useRouter } from "next/navigation";
 import { useSWRConfig } from "swr";
+import packageLockV3 from "@/test/fixtures/package_lock_v3.json";
+import { getDependencyNamesAndVersions } from "@/utils/client/utils";
 
 export interface DependencyTreeInterface {
   name: string | undefined;
@@ -18,6 +20,7 @@ export interface DependencyTreeInterface {
   tree: NpmPackage[];
   devTree: NpmPackage[];
   dependencyCount: number;
+  dependencies: [string, string][];
 }
 
 export default function LockfileInput() {
@@ -87,7 +90,7 @@ export default function LockfileInput() {
         ) => {
           switch (e.data[0]) {
             case "complete":
-              const [tree, devTree, count] = e.data[1];
+              const [tree, devTree] = e.data[1];
 
               setLoadingStatus((prev) => ({
                 ...prev,
@@ -98,12 +101,15 @@ export default function LockfileInput() {
 
               worker.terminate();
 
+              const deps = getDependencyNamesAndVersions({ tree, devTree });
+
               setDependencyTree({
                 name: lockFile.name,
                 version: lockFile.version,
                 tree,
                 devTree,
-                dependencyCount: count,
+                dependencyCount: deps.length,
+                dependencies: deps,
               });
               setError("");
               router.push("/report");

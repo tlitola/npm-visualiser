@@ -5,20 +5,19 @@ import useSWR from "swr";
 import DTPageHeader from "./DTPageHeader";
 import DependencyTree from "./DependencyTree";
 import { redirect } from "next/navigation";
-import { getPackageNameAndVersion } from "@/utils/client/utils";
 import { fetchAllPackagesInfo, fetchAllPackagesVulnerabilites } from "@/utils/client/fetchers";
+import { DependencyTreeInterface } from "./LockfileInput";
 
 export default function DependencyTreePage() {
-  const { data: dependencyTree } = useSWR("dependencyTree", { revalidateOnFocus: false });
+  const { data: dependencyTree } = useSWR<DependencyTreeInterface>("dependencyTree", { revalidateOnFocus: false });
 
-  const { data: packageInfo } = useSWR(
-    "packageInfo",
-    () => fetchAllPackagesInfo(getPackageNameAndVersion(dependencyTree)),
-    { revalidateOnFocus: false },
-  );
+  const { data: packageInfo } = useSWR("packageInfo", () => fetchAllPackagesInfo(dependencyTree?.dependencies ?? []), {
+    revalidateOnFocus: false,
+  });
+
   const { data: vulns } = useSWR(
     "packageVulnerability",
-    () => fetchAllPackagesVulnerabilites(getPackageNameAndVersion(dependencyTree)),
+    () => fetchAllPackagesVulnerabilites(dependencyTree?.dependencies ?? []),
     { revalidateOnFocus: false },
   );
 

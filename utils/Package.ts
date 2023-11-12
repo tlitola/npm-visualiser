@@ -31,7 +31,7 @@ export const packageVulnerability = z.object({
   id: z.string(),
   name: z.string(),
   version: z.string(),
-  summary: z.string(),
+  summary: z.string().optional(),
   details: z.string(),
   published: z.string(),
   modified: z.string(),

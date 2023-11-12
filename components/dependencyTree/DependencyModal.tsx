@@ -23,8 +23,7 @@ export default function DepepndencyModal({
   show: boolean;
   hide: () => void;
 }) {
-  const defaultDownloads = useMemo(() => ["Weekly downloads", info?.downloads] as [string, number], [info]);
-  const [downloads, setDownloads] = useState<[string, number] | undefined>(undefined);
+  const [downloads, setDownloads] = useState<[string, number]>(["Weekly downloads", NaN]);
 
   const DownloadsChart = useMemo(
     () =>
