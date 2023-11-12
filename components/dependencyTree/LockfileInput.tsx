@@ -72,7 +72,7 @@ export default function LockfileInput() {
         isLoading: true,
         step: 0,
         now: 0,
-        message: "Current: \n s",
+        message: "Current dependency: \n ",
         steps,
       });
 
