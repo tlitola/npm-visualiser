@@ -11,9 +11,9 @@ import Loading from "../Loading";
 import useSWRMutation from "swr/mutation";
 import { useRouter } from "next/navigation";
 import { useSWRConfig } from "swr";
-import packageLockV3 from "@/test/fixtures/package_lock_v3.json";
 import { getDependencyNamesAndVersions } from "@/utils/client/utils";
 
+const { signal } = new AbortController();
 export interface DependencyTreeInterface {
   name: string | undefined;
   version: string | undefined;
@@ -144,8 +144,14 @@ export default function LockfileInput() {
       <div className="tw-w-screen tw-relative">
         <DragAndDrop disabled={loadingStatus.isLoading} onFileChange={updateDependencyTree} className="tw-pb-6" />
         <p
-          onClick={() => {
-            const file = new File([JSON.stringify(packageLockV3)], "package-lock.json", { type: "application/json" });
+          onClick={async () => {
+            const file = new File(
+              [await (await fetch("/package_lock_example.json", { signal })).blob()],
+              "package_lock_example.json",
+              {
+                type: "application/json",
+              },
+            );
             updateDependencyTree(file, () => {});
           }}
           className="tw-italic tw-font-light tw-absolute -tw-bottom-2 tw-right-1/2 tw-translate-x-1/2 tw-cursor-pointer tw-text-gray-500 tw-underline hover:tw-text-gray-700"
