@@ -72,7 +72,7 @@ export default function DepepndencyModal({
             <ModalTitle>Description</ModalTitle>
             <p>{info?.description}</p>
             <ModalTitle>Dependencies</ModalTitle>
-            <p>{dependency.totalDependencies}</p>
+            <p>{dependency.dependencies?.length}</p>
             <ModalTitle>Vulnerabilities ({vulns?.length ?? 0})</ModalTitle>
             <div>
               <Accordion flush>

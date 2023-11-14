@@ -65,7 +65,10 @@ export const getChildrenVulnerabilities = (dep: NpmPackage, vulns: Record<string
   const childrenVulns: Record<string, PackageVulnerability[]> = {};
 
   children.forEach((el) => {
-    if (el.name !== dep.name && el.version !== dep.version && Object.hasOwn(vulns, `${el.name}@${el.version}`)) {
+    if (
+      `${el.name}@${el.version}` !== `${dep.name}@${dep.version}` &&
+      Object.hasOwn(vulns, `${el.name}@${el.version}`)
+    ) {
       childrenVulns[`${el.name}@${el.version}`] = vulns[`${el.name}@${el.version}`];
     }
   });
