@@ -8,7 +8,7 @@ import { useRef, useState } from "react";
 import Tag from "../Tag";
 import { Stack } from "react-bootstrap";
 import { PackageInfo, PackageVulnerability } from "@/utils/Package";
-import { findWorstVuln } from "@/utils/client/utils";
+import { findWorstVuln, getChildrenVulnerabilities } from "@/utils/client/utils";
 import DepepndencyModal from "./DependencyModal";
 
 const baseLink = "https://www.npmjs.com/package/";
@@ -82,6 +82,14 @@ export default function DependencyNode({
                 severity: findWorstVuln({
                   "": vulns[dependency.name + "@" + dependency.version],
                 }),
+              }}
+            />
+          )}
+          {Object.keys(getChildrenVulnerabilities(dependency, vulns)).length !== 0 && (
+            <Tag
+              params={{
+                type: "dangerChildren",
+                severity: findWorstVuln(getChildrenVulnerabilities(dependency, vulns)),
               }}
             />
           )}

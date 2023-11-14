@@ -12,6 +12,7 @@ export default function Tag({
     | { type: "version"; version: string }
     | { type: "warning"; message: string }
     | { type: "danger"; severity: CVSSThreadLevel }
+    | { type: "dangerChildren"; severity: CVSSThreadLevel }
     | { type: "circular" };
 } & ComponentPropsWithoutRef<"div">) {
   let tag = <Badge></Badge>;
@@ -56,6 +57,18 @@ export default function Tag({
           {...rest}
           className={`text-vuln-${params.severity.toLowerCase()}`}
           title="This dependency has a known vulnerability. Click here to learn more"
+        >
+          <FontAwesomeIcon icon={faCircleExclamation} />
+        </div>
+      );
+      break;
+
+    case "dangerChildren":
+      tag = (
+        <div
+          {...rest}
+          className={`text-vuln-${params.severity.toLowerCase()} !tw-text-opacity-40`}
+          title="One or more of this dependency's children has a vulnerability"
         >
           <FontAwesomeIcon icon={faCircleExclamation} />
         </div>

@@ -59,6 +59,19 @@ export const getDependencyNamesAndVersions = ({
   return result;
 };
 
+export const getChildrenVulnerabilities = (dep: NpmPackage, vulns: Record<string, PackageVulnerability[]>) => {
+  const children = getAllDependencies(dep);
+
+  const childrenVulns: Record<string, PackageVulnerability[]> = {};
+
+  children.forEach((el) => {
+    if (el.name !== dep.name && el.version !== dep.version && Object.hasOwn(vulns, `${el.name}@${el.version}`)) {
+      childrenVulns[`${el.name}@${el.version}`] = vulns[`${el.name}@${el.version}`];
+    }
+  });
+  return childrenVulns;
+};
+
 const getAllDependencies = (dependency: NpmPackage): NpmPackage[] => {
   if (dependency.dependencies && dependency.dependencies?.length === 0) return [dependency];
   return [dependency].concat(
