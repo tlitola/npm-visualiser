@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 //Zod schemas for handling package tree
-const basePackage = z
+export const npmPackage = z
   .object({
     name: z.string(),
     //There doesn't seem to be a way to merge z.object and z.record without the rules of the latter affecting the first one
@@ -9,25 +9,16 @@ const basePackage = z
     version: z.string().default("undefined"),
     resolved: z.string(),
     integrity: z.string(),
-    cyclic: z.boolean(),
+    optional: z.boolean(),
+    peer: z.boolean(),
   })
   .partial()
   .passthrough();
 
-export type NpmPackage = z.infer<typeof basePackage> & {
-  dependencies?: NpmPackage[];
-  devDependencies?: NpmPackage[];
-  totalDependencies: number;
-};
-
-export const npmPackage: z.ZodType<NpmPackage> = basePackage.extend({
-  dependencies: z.lazy(() => npmPackage.array()).optional(),
-  devDependencies: z.lazy(() => npmPackage.array()).optional(),
-  totalDependencies: z.number(),
-});
+export type NpmPackage = z.infer<typeof npmPackage>;
 
 //Zod schema for reading package-lock.json file
-export const lockFilePackage = basePackage.extend({
+export const lockFilePackage = npmPackage.extend({
   dependencies: z.record(z.string(), z.string()).optional(),
 });
 

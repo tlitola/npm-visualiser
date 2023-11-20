@@ -5,39 +5,24 @@ import { LoadingStatusUpdate, ParseCompleteMessage } from "../protocol";
 self.onmessage = async (e: MessageEvent<[string, PackageLock]>) => {
   switch (e.data[0]) {
     case "generate":
-      const result = e.data[1];
+      const lockfile = e.data[1];
 
-      const dependencyCount = Object.keys(result.packages[""].dependencies ?? {}).length;
-      const tree = createDependencyGraph(result, "dependencies", (dependencyNumber, dependencyName) => {
+      const dependencyCount = Object.keys(lockfile.packages[""].dependencies ?? {}).length;
+      const graph = createDependencyGraph(lockfile, (dependencyNumber, dependencyName) => {
         self.postMessage([
           "loadingStatus",
-          [
-            0,
-            (dependencyNumber / dependencyCount) * 100,
-            `${dependencyNumber}/${dependencyCount}: ${dependencyName}`,
-          ] satisfies LoadingStatusUpdate,
-        ]);
+          0,
+          (dependencyNumber / dependencyCount) * 100,
+          `${dependencyNumber}/${dependencyCount}: ${dependencyName}`,
+        ] satisfies LoadingStatusUpdate);
       });
 
-      //Rest to allow the loading animation time to catch up
-      dependencyCount > 0 && (await new Promise((resolve) => setTimeout(() => resolve(""), 1000)));
-
-      const devDependencyCount = Object.keys(result.packages[""].devDependencies ?? {}).length;
-      const devTree = createDependencyGraph(result, "devDependencies", (dependencyNumber, dependencyName) => {
-        self.postMessage([
-          "loadingStatus",
-          [
-            1,
-            (dependencyNumber / devDependencyCount) * 100,
-            `${dependencyNumber}/${devDependencyCount}: ${dependencyName}`,
-          ] satisfies LoadingStatusUpdate,
-        ]);
-      });
-
-      //Rest to allow the loading animation time to catch up
-      devDependencyCount > 0 && (await new Promise((resolve) => setTimeout(() => resolve(""), 1000)));
-
-      self.postMessage(["complete", [tree, devTree] satisfies ParseCompleteMessage]);
+      self.postMessage([
+        "complete",
+        graph,
+        Object.keys(lockfile.packages[""].dependencies ?? {}),
+        Object.keys(lockfile.packages[""].devDependencies ?? {}),
+      ] satisfies ParseCompleteMessage);
       break;
 
     default:

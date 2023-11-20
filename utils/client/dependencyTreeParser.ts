@@ -1,108 +1,73 @@
-import { LockFilePackage, NpmPackage, PackageLock, npmPackage } from "../PackageLock";
+import { NpmPackage, PackageLock, npmPackage } from "../PackageLock";
+import { DepGraph } from "dependency-graph";
 
 import omit from "lodash.omit";
 
 export const createDependencyGraph = (
   lockfile: PackageLock,
-  type: "dependencies" | "devDependencies" = "dependencies",
   updateStatus?: (dependencyNumber: number, name: string, subPackageName?: string) => void,
-) => {
-  let dependencyList;
+): DepGraph<NpmPackage> => {
+  let dependencies = Object.keys(omit(lockfile.packages, ""));
 
-  switch (type) {
-    case "dependencies":
-      dependencyList = lockfile.packages[""].dependencies ?? {};
-      break;
-    case "devDependencies":
-      dependencyList = lockfile.packages[""].devDependencies ?? {};
-      break;
-  }
+  const graph = new DepGraph<NpmPackage>({ circular: true });
 
-  const dependencies: NpmPackage[] = Object.keys(dependencyList).map((packageName, i) => {
-    updateStatus && updateStatus(i + 1, packageName);
-    return {
-      name: packageName,
-      ...findDependencies(
-        lockfile,
-        "node_modules" + "/" + packageName,
-        lockfile.packages["node_modules/" + packageName],
-        packageName,
-        [packageName],
-        new Map(),
-      ),
-    };
-  });
-  return dependencies;
-};
-
-const getDependency = (lockfile: PackageLock, path: string, dependency: string) => {
-  if (Object.hasOwn(lockfile.packages, path + "/node_modules/" + dependency)) {
-    return lockfile.packages[path + "/node_modules/" + dependency];
-  }
-  return lockfile.packages["node_modules/" + dependency];
-};
-
-const getPath = (lockfile: PackageLock, path: string, dependency: string) => {
-  if (Object.hasOwn(lockfile.packages, path + "/node_modules/" + dependency)) {
-    return path + "/node_modules/" + dependency;
-  }
-  return "node_modules/" + dependency;
-};
-
-const findDependencies = (
-  lockfile: PackageLock,
-  path: string,
-  dependency: LockFilePackage,
-  name: string,
-  stack: string[],
-  dp: Map<string, NpmPackage>,
-): NpmPackage => {
-  if (dp.has(`${name}-${dependency.version}`)) {
-    return dp.get(`${name}-${dependency.version}`) as NpmPackage;
-  }
-
-  const new_dependency = npmPackage.parse(omit({ ...dependency, name, totalDependencies: 0 }, ["dependencies"]));
-
-  const dependencies = Object.keys(dependency.dependencies ?? {}).map((dependencyName) => {
-    if (stack.includes(dependencyName))
-      return {
-        name: dependencyName,
-        cyclic: true,
-        ...npmPackage.parse(
-          omit(
-            {
-              ...getDependency(lockfile, path, dependencyName),
-              totalDependencies: 0,
-            },
-            ["dependencies"],
-          ),
-        ),
-      };
-
-    return {
-      name: dependencyName,
-      ...findDependencies(
-        lockfile,
-        getPath(lockfile, path, dependencyName),
-        getDependency(lockfile, path, dependencyName),
-        dependencyName,
-        [...stack, dependencyName],
-        dp,
-      ),
-    };
+  //Add nodes to the graph excluding optional peer-dependencies
+  dependencies.forEach((key) => {
+    if (lockfile.packages[key].peer === true && lockfile.packages[key].optional === true) {
+      dependencies = dependencies.filter((el) => el !== key);
+    } else {
+      graph.addNode(
+        key.replaceAll("node_modules/", ""),
+        npmPackage.parse({ ...lockfile.packages[key], name: key.split("node_modules/").at(-1) }),
+      );
+    }
   });
 
-  new_dependency["dependencies"] = dependencies;
-  new_dependency["totalDependencies"] = calculateFullDependencyCount(new_dependency);
+  //Add edges to the graph
+  dependencies.forEach((key) => {
+    const dep = lockfile.packages[key];
+    const graphKey = key.replaceAll("node_modules/", "");
+    Object.keys(dep.dependencies ?? {}).forEach((depKey) => {
+      graph.addDependency(
+        graphKey.replaceAll("node_modules/", ""),
+        getPath(lockfile, key, depKey).replaceAll("node_modules/", ""),
+      );
+    });
+  });
 
-  dp.set(`${new_dependency.name}-${new_dependency.version}`, new_dependency);
+  dependencies.forEach((key) => {
+    const graphKey = key.replaceAll("node_modules/", "");
+    //Remove nodes that doesn't have any edges and are not direct dependencies
+    if (graph.dependantsOf(graphKey).length === 0 && graph.dependenciesOf(graphKey).length === 0) {
+      if (
+        !Object.keys(lockfile.packages[""].dependencies ?? {}).includes(graphKey.replace("node_modules/", "")) &&
+        !Object.keys(lockfile.packages[""].devDependencies ?? {}).includes(graphKey.replace("node_modules/", ""))
+      ) {
+        graph.removeNode(graphKey);
+      }
+    }
+  });
 
-  return new_dependency;
+  return graph;
 };
 
-const calculateFullDependencyCount = (dependency: NpmPackage) => {
-  return (
-    (dependency.dependencies?.reduce((acc, el) => acc + (el.totalDependencies ?? 0), 0) ?? 0) +
-    (dependency.dependencies?.length ?? 0)
-  );
+/**
+ * Finds the path of a dependency in the lockfile
+ * @param {PackageLock} lockfile
+ * @param {string} currentPath Tells which dependency given dependency depends on, eg. node_modules/@babel/highlight
+ * @param {string} dependencyName The name of dependency to look for, eg. chalk
+ * @returns {string} The path of dependency in the lockfile, eg. node_modules/@babel/highlight/node_modules/chalk
+ */
+const getPath = (lockfile: PackageLock, currentPath: string, dependencyName: string) => {
+  if (Object.hasOwn(lockfile.packages, currentPath + "/node_modules/" + dependencyName)) {
+    return currentPath + "/node_modules/" + dependencyName;
+  } else if (
+    Object.hasOwn(
+      lockfile.packages,
+      currentPath.replace(currentPath.split("node_modules/").at(-1) as string, dependencyName),
+    )
+  ) {
+    return currentPath.replace(currentPath.split("node_modules/").at(-1) as string, dependencyName);
+  }
+  return "node_modules/" + dependencyName;
 };
