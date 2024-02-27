@@ -11,6 +11,7 @@ import { useSWRConfig } from "swr";
 import { DepGraph } from "dependency-graph";
 import { createDependencyGraph } from "@/utils/client/dependencyTreeParser";
 import { getDependencyNamesAndVersions } from "@/utils/client/utils";
+import Loading from "@/components/loading/Loading";
 
 const { signal } = new AbortController();
 
@@ -100,6 +101,7 @@ export default function LockfileInput() {
               Parsing the lockfile
             </h2>
             <p className="tw-mb-12 tw-text-xl tw-font-medium tw-text-slate-700">This should only take a few seconds</p>
+            <Loading />
           </Card>
         </>
       )}
