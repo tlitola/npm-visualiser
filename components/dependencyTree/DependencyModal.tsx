@@ -1,6 +1,6 @@
 import { PackageInfo, PackageVulnerability } from "@/utils/Package";
 import { NpmPackage } from "@/utils/PackageLock";
-import { capitalizeFirst, sortBySeverity, addMetricSuffix } from "@/utils/client/utils";
+import { addMetricSuffix, capitalizeFirst, sortBySeverity } from "@/utils/client/utils";
 import { faGithub, faNpm } from "@fortawesome/free-brands-svg-icons";
 import { faHome } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,15 +9,18 @@ import { PropsWithChildren, useMemo, useState } from "react";
 import { Accordion, CloseButton, Col, Modal, Row, Stack } from "react-bootstrap";
 import Tag from "../Tag";
 import dynamic from "next/dynamic";
+import { DepGraph } from "dependency-graph";
 
-export default function DepepndencyModal({
-  dependency,
-  show,
+export default function DependencyModal({
+  graph,
+  dependencyKey,
   info,
   vulns,
+  show,
   hide,
 }: {
-  dependency: NpmPackage;
+  graph: DepGraph<NpmPackage>;
+  dependencyKey: string;
   info?: PackageInfo;
   vulns: PackageVulnerability[];
   show: boolean;
@@ -33,6 +36,7 @@ export default function DepepndencyModal({
     [],
   );
 
+  const dependency = graph.getNodeData(dependencyKey);
   const baseLink = "https://www.npmjs.com/package/";
   return (
     <Modal size="lg" show={show} onHide={hide}>
@@ -72,7 +76,7 @@ export default function DepepndencyModal({
             <ModalTitle>Description</ModalTitle>
             <p>{info?.description}</p>
             <ModalTitle>Dependencies</ModalTitle>
-            <p>{dependency.dependencies?.length}</p>
+            <p>{graph.directDependenciesOf(dependencyKey).length}</p>
             <ModalTitle>Vulnerabilities ({vulns?.length ?? 0})</ModalTitle>
             <div>
               <Accordion flush>

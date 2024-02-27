@@ -3,10 +3,7 @@ import { DepGraph } from "dependency-graph";
 
 import omit from "lodash.omit";
 
-export const createDependencyGraph = (
-  lockfile: PackageLock,
-  updateStatus?: (dependencyNumber: number, name: string, subPackageName?: string) => void,
-): DepGraph<NpmPackage> => {
+export const createDependencyGraph = (lockfile: PackageLock): DepGraph<NpmPackage> => {
   let dependencies = Object.keys(omit(lockfile.packages, ""));
 
   const graph = new DepGraph<NpmPackage>({ circular: true });
@@ -28,26 +25,21 @@ export const createDependencyGraph = (
     const dep = lockfile.packages[key];
     const graphKey = key.replaceAll("node_modules/", "");
     Object.keys(dep.dependencies ?? {}).forEach((depKey) => {
-      graph.addDependency(
-        graphKey.replaceAll("node_modules/", ""),
-        getPath(lockfile, key, depKey).replaceAll("node_modules/", ""),
-      );
+      graph.addDependency(graphKey, getPath(lockfile, key, depKey).replaceAll("node_modules/", ""));
     });
   });
-
   dependencies.forEach((key) => {
     const graphKey = key.replaceAll("node_modules/", "");
-    //Remove nodes that doesn't have any edges and are not direct dependencies
+    //Remove nodes that don't have any edges and are not direct dependencies
     if (graph.dependantsOf(graphKey).length === 0 && graph.dependenciesOf(graphKey).length === 0) {
       if (
-        !Object.keys(lockfile.packages[""].dependencies ?? {}).includes(graphKey.replace("node_modules/", "")) &&
-        !Object.keys(lockfile.packages[""].devDependencies ?? {}).includes(graphKey.replace("node_modules/", ""))
+        !Object.keys(lockfile.packages[""].dependencies ?? {}).includes(graphKey) &&
+        !Object.keys(lockfile.packages[""].devDependencies ?? {}).includes(graphKey)
       ) {
         graph.removeNode(graphKey);
       }
     }
   });
-
   return graph;
 };
 

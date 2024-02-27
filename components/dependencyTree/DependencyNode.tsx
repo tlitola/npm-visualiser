@@ -1,5 +1,3 @@
-"use client";
-
 import { NpmPackage } from "@/utils/PackageLock";
 import { faArrowUpRightFromSquare, faCaretDown, faCaretUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,21 +7,24 @@ import Tag from "../Tag";
 import { Stack } from "react-bootstrap";
 import { PackageInfo, PackageVulnerability } from "@/utils/Package";
 import { findWorstVuln, getChildrenVulnerabilities } from "@/utils/client/utils";
-import DepepndencyModal from "./DependencyModal";
+import DependencyModal from "./DependencyModal";
+import { DepGraph } from "dependency-graph";
 
 const baseLink = "https://www.npmjs.com/package/";
 
 export default function DependencyNode({
-  dependency,
+  graph,
+  dependencyKey,
   depth,
   parents,
   packageInfo,
   vulns,
 }: {
-  packageInfo: Record<string, PackageInfo>;
-  dependency: NpmPackage;
+  graph: DepGraph<NpmPackage>;
+  dependencyKey: string;
   depth: number;
-  parents: { [key: string]: () => void };
+  parents: Record<string, () => void>;
+  packageInfo: Record<string, PackageInfo>;
   vulns: Record<string, PackageVulnerability[]>;
 }) {
   const [open, setOpen] = useState(false);
@@ -44,6 +45,10 @@ export default function DependencyNode({
     );
     nodeRef.current?.classList.remove("tw-animate-highlight");
   };
+
+  const dependency = graph.getNodeData(dependencyKey);
+  const dependencies = graph.directDependenciesOf(dependencyKey);
+  const cyclic = Object.hasOwn(parents, `${dependency.name}-${dependency.version}`);
 
   return (
     <>
@@ -66,7 +71,7 @@ export default function DependencyNode({
 
         <Stack direction="horizontal" gap={2}>
           <Tag params={{ type: "version", version: dependency.version ?? "" }} />
-          {dependency.cyclic && (
+          {cyclic && (
             <Tag
               params={{ type: "circular" }}
               onClick={(e) => {
@@ -85,11 +90,11 @@ export default function DependencyNode({
               }}
             />
           )}
-          {Object.keys(getChildrenVulnerabilities(dependency, vulns)).length !== 0 && (
+          {Object.keys(getChildrenVulnerabilities(dependencyKey, graph, vulns)).length !== 0 && (
             <Tag
               params={{
                 type: "dangerChildren",
-                severity: findWorstVuln(getChildrenVulnerabilities(dependency, vulns)),
+                severity: findWorstVuln(getChildrenVulnerabilities(dependencyKey, graph, vulns)),
               }}
             />
           )}
@@ -103,7 +108,7 @@ export default function DependencyNode({
           )}
         </Stack>
 
-        {(!dependency.dependencies || dependency.dependencies?.length > 0) && !dependency.cyclic && (
+        {dependencies.length > 0 && !cyclic && (
           <FontAwesomeIcon
             className="tw-ml-3 tw-select-none tw-text-gray-500 hover:tw-text-black"
             role="button"
@@ -115,32 +120,37 @@ export default function DependencyNode({
           />
         )}
       </span>
-      {open && dependency.dependencies && (
+      {open && dependencies.length > 0 && (
         <section
           style={{ marginLeft: 16 * depth, minWidth: `calc(100% - ${16 * depth}px` }}
           className={`tw-flex tw-flex-col tw-items-start`}
         >
-          {dependency.dependencies.map((el) => (
-            <DependencyNode
-              vulns={vulns}
-              parents={{
-                ...parents,
-                [`${dependency.name}-${dependency.version}`]: hightlightNode,
-              }}
-              key={`${el.name}-${el.version}-${depth}`}
-              dependency={el}
-              depth={depth + 1}
-              packageInfo={packageInfo}
-            />
-          ))}
+          {dependencies.map((el) => {
+            const dep = graph.getNodeData(el);
+            return (
+              <DependencyNode
+                vulns={vulns}
+                parents={{
+                  ...parents,
+                  [`${dependency.name}-${dependency.version}`]: hightlightNode,
+                }}
+                key={`${dep.name}-${dep.version}-${depth}`}
+                graph={graph}
+                dependencyKey={el}
+                depth={depth + 1}
+                packageInfo={packageInfo}
+              />
+            );
+          })}
         </section>
       )}
-      <DepepndencyModal
+      <DependencyModal
         info={packageInfo[dependency.name + "@" + dependency.version]}
         show={showModal}
         hide={() => setShowModal(false)}
         vulns={vulns[dependency.name + "@" + dependency.version]}
-        dependency={dependency}
+        graph={graph}
+        dependencyKey={dependencyKey}
       />
     </>
   );

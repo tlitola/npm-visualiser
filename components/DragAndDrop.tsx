@@ -1,9 +1,8 @@
-"use client";
-
 import { faFileArrowDown, faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DragEventHandler, useEffect, useRef, useState } from "react";
 import { Button, Card, CardBody, CardText, CardTitle } from "react-bootstrap";
+
 export default function DragAndDrop({
   onFileChange,
   disabled,

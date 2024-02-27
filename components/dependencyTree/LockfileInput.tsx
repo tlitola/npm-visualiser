@@ -2,25 +2,25 @@
 
 import { NpmPackage } from "@/utils/PackageLock";
 import { readLockFile } from "@/utils/client/parser";
-import { LoadingStatusUpdate, ParseCompleteMessage, loadingStatusUpdate } from "@/utils/protocol";
 import { useEffect, useState } from "react";
-import { z } from "zod";
 import DragAndDrop from "../DragAndDrop";
 import { Card } from "react-bootstrap";
-import Loading from "../Loading";
 import useSWRMutation from "swr/mutation";
 import { useRouter } from "next/navigation";
 import { useSWRConfig } from "swr";
+import { DepGraph } from "dependency-graph";
+import { createDependencyGraph } from "@/utils/client/dependencyTreeParser";
 import { getDependencyNamesAndVersions } from "@/utils/client/utils";
 
 const { signal } = new AbortController();
-export interface DependencyTreeInterface {
+
+export interface DependencyGraph {
   name: string | undefined;
   version: string | undefined;
-  tree: NpmPackage[];
-  devTree: NpmPackage[];
-  dependencyCount: number;
-  dependencies: [string, string][];
+  graph: DepGraph<NpmPackage>;
+  dependencies?: string[];
+  devDependencies?: string[];
+  dependencyList: [string, string][];
 }
 
 export default function LockfileInput() {
@@ -28,10 +28,11 @@ export default function LockfileInput() {
 
   const { trigger: setDependencyTree } = useSWRMutation(
     "dependencyTree",
-    (_key, { arg }: { arg: DependencyTreeInterface }) => arg,
+    (_key, { arg }: { arg: DependencyGraph }) => arg,
     { populateCache: true },
   );
 
+  //reset packageInfo and packageVulnerability, which is important in case of back navigation
   useEffect(() => {
     mutate("packageInfo", null);
     mutate("packageVulnerability", null);
@@ -39,102 +40,32 @@ export default function LockfileInput() {
 
   const [loadingStatus, setLoadingStatus] = useState<{
     isLoading: boolean;
-    step: number;
-    now: number;
-    message: string;
-    steps: string[];
-  }>({ isLoading: false, step: 0, now: 0, message: "", steps: [] });
+  }>({ isLoading: false });
 
   const router = useRouter();
 
-  const setLoading = (loading: boolean) => {
-    setLoadingStatus((prev) => ({ ...prev, isLoading: loading }));
-  };
-
   const updateDependencyTree = async (newFile: File, setError: (error?: string) => void) => {
-    function handleZodParseError<T>(data: z.SafeParseError<T>) {
-      console.log(data.error.toString());
-      setError("Something went wrong, please try again");
-      setLoading(false);
-    }
-
     try {
+      setLoadingStatus({ isLoading: true });
       //Parse file
-      const lockFile = await readLockFile(newFile, (status) => {
-        setLoading(status);
+      const lockFile = await readLockFile(newFile);
+
+      const graph = createDependencyGraph(lockFile);
+
+      await setDependencyTree({
+        name: lockFile.name,
+        version: lockFile.version,
+        graph,
+        dependencies: lockFile.packages[""].dependencies ? Object.keys(lockFile.packages[""].dependencies) : undefined,
+        devDependencies: lockFile.packages[""].devDependencies
+          ? Object.keys(lockFile.packages[""].devDependencies)
+          : undefined,
+        dependencyList: getDependencyNamesAndVersions(graph),
       });
 
-      //Update loading status
-      const steps = [];
-      lockFile.packages[""].dependencies && steps.push("Dependencies");
-      lockFile.packages[""].devDependencies && steps.push("Dev\nDependencies");
-      setLoadingStatus({
-        isLoading: true,
-        step: 0,
-        now: 0,
-        message: "Current dependency: \n ",
-        steps,
-      });
-
-      //Create web worker to parse the file
-      const worker = new Worker(new URL("../../utils/client/dependencyTreeWorker.ts", import.meta.url));
-      if (window.Worker) {
-        worker.postMessage(["generate", lockFile]);
-        worker.onerror = (e) => {
-          setError(e.message);
-          setLoading(false);
-        };
-
-        worker.onmessage = (
-          e: MessageEvent<["complete", ParseCompleteMessage] | ["loadingStatus", LoadingStatusUpdate]>,
-        ) => {
-          switch (e.data[0]) {
-            case "complete":
-              const [tree, devTree] = e.data[1];
-
-              setLoadingStatus((prev) => ({
-                ...prev,
-                step: prev.step + 1,
-                now: 0,
-                message: "Complete\n ",
-              }));
-
-              worker.terminate();
-
-              const deps = getDependencyNamesAndVersions({ tree, devTree });
-
-              setDependencyTree({
-                name: lockFile.name,
-                version: lockFile.version,
-                tree,
-                devTree,
-                dependencyCount: deps.length,
-                dependencies: deps,
-              });
-              setError("");
-              router.push("/report");
-
-              break;
-
-            case "loadingStatus":
-              const loadingData = loadingStatusUpdate.safeParse(e.data[1]);
-              if (!loadingData.success) {
-                handleZodParseError(loadingData);
-                return;
-              }
-
-              const [step, now, message] = loadingData.data;
-              setLoadingStatus((prev) => ({
-                ...prev,
-                step,
-                now,
-                message: "Current dependency:\n" + message,
-              }));
-          }
-        };
-      }
+      router.push("/report");
     } catch (error) {
-      setLoading(false);
+      setLoadingStatus({ isLoading: false });
       if (error instanceof Error) setError(error.message);
     }
   };
@@ -152,7 +83,7 @@ export default function LockfileInput() {
                 type: "application/json",
               },
             );
-            updateDependencyTree(file, () => {});
+            await updateDependencyTree(file, () => {});
           }}
           className="tw-italic tw-font-light tw-absolute -tw-bottom-2 tw-right-1/2 tw-translate-x-1/2 tw-cursor-pointer tw-text-gray-500 tw-underline hover:tw-text-gray-700"
         >
@@ -169,12 +100,6 @@ export default function LockfileInput() {
               Parsing the lockfile
             </h2>
             <p className="tw-text-slate-700 tw-font-medium tw-text-xl tw-mb-12">This should only take a few seconds</p>
-            <Loading
-              statusText={loadingStatus.message}
-              step={loadingStatus.step}
-              now={loadingStatus.now}
-              steps={loadingStatus.steps}
-            />
           </Card>
         </>
       )}

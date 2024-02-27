@@ -2,7 +2,6 @@ import { Row, Col, Stack, Card } from "react-bootstrap";
 import Tag from "../Tag";
 import {
   calculateDownloadSize,
-  calculateTotalDependencyCount,
   capitalizeFirst,
   findWorstVuln,
   getVulnsCount,
@@ -15,27 +14,27 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import { DependencyTreeInterface } from "./LockfileInput";
+import { DependencyGraph } from "./LockfileInput";
 import Link from "next/link";
 
 export default function DTPageHeader({
-  dependencyTree,
+  dependencyGraph,
   packageInfo,
   vulns,
 }: {
   packageInfo?: Record<string, PackageInfo>;
   vulns?: Record<string, PackageVulnerability[]>;
-  dependencyTree: DependencyTreeInterface;
+  dependencyGraph: DependencyGraph;
 }) {
   return (
     <Row className="tw-mb-6 tw-w-full">
       <Col>
         <Stack direction="horizontal" className="tw-mb-1">
-          <h1 className="tw-my-auto tw-mr-4">{dependencyTree?.name}</h1>
-          {dependencyTree?.version && (
+          <h1 className="tw-my-auto tw-mr-4">{dependencyGraph?.name}</h1>
+          {dependencyGraph?.version && (
             <Tag
               className="!tw-px-2 !tw-py-1 !tw-text-base"
-              params={{ type: "version", version: dependencyTree?.version }}
+              params={{ type: "version", version: dependencyGraph?.version }}
             />
           )}
         </Stack>
@@ -48,16 +47,14 @@ export default function DTPageHeader({
         <Stack className="tw-justify-end" direction="horizontal" gap={4}>
           <Card
             className="!tw-h-32 tw-w-32"
-            title={`This package has ${dependencyTree.dependencyCount} unique dependencies, ${
-              dependencyTree.tree.length + dependencyTree.devTree.length
-            } of which are direct. Transitively, the package has ${
-              calculateTotalDependencyCount(dependencyTree.tree) + calculateTotalDependencyCount(dependencyTree.devTree)
-            } dependencies.`}
+            title={`This package has ${dependencyGraph.graph.size()} unique dependencies, ${
+              dependencyGraph.graph.entryNodes().length
+            } of which are direct. Transitively, the package has ${dependencyGraph.graph.size()} dependencies.`}
           >
             <Card.Title className="!tw-text-base tw-text-center  !-tw-mb-2 !tw-mt-2">Dependencies</Card.Title>
-            <Card.Body className="tw-text-center tw-mt-2">{dependencyTree.dependencyCount}</Card.Body>
+            <Card.Body className="tw-text-center tw-mt-2">{dependencyGraph.graph.size()}</Card.Body>
             <Card.Footer className="tw-font-light tw-text-sm tw-text-center tw-mt-[1px]">{`Direct: ${
-              dependencyTree.tree.length + dependencyTree.devTree.length
+              dependencyGraph.graph.entryNodes().length
             }`}</Card.Footer>
           </Card>
           <Card className="!tw-h-32 tw-w-32" title={vulns && getVulnsCountText(vulns)}>

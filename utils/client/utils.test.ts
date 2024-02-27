@@ -2,17 +2,14 @@ import { describe, expect, test } from "vitest";
 import {
   addMetricSuffix,
   calculateDownloadSize,
-  calculateTotalDependencyCount,
   findWorstVuln,
-  getPackageNameAndVersion,
   getVulnCounts,
   getVulnsCountText,
   packageSizeMissing,
   sortBySeverity,
 } from "./utils";
-import { PackageFactory, PackageInfoFactory, buildPackageInfoRecord } from "../../test/factories/packageInfoFactory";
-import { NpmPackage } from "../PackageLock";
-import { VulnerabilityFactory, buildVulnerabilitiesRecord } from "../../test/factories/vulnerabilityFactory";
+import { buildPackageInfoRecord, PackageInfoFactory } from "@/test/factories/packageInfoFactory";
+import { buildVulnerabilitiesRecord, VulnerabilityFactory } from "@/test/factories/vulnerabilityFactory";
 
 describe("addMetricSuffix", () => {
   test("Adds correct suffix", () => {
@@ -65,33 +62,6 @@ describe("packageSizeMissing", () => {
       PackageInfoFactory.build({ unpackedSize: 1211 }),
     );
     expect(packageSizeMissing(packages)).toBe(true);
-  });
-});
-
-describe("getPackageNameAndVersion", () => {
-  test("Creates list correctly", () => {
-    const tree = [
-      PackageFactory.build({ name: "foo", version: "bar" }),
-      PackageFactory.build({ name: "hello", version: "world" }),
-    ] as NpmPackage[];
-
-    expect(getPackageNameAndVersion({ tree, devTree: tree })).toEqual([
-      ["foo", "bar"],
-      ["hello", "world"],
-      ["foo", "bar"],
-      ["hello", "world"],
-    ]);
-  });
-  test("Creates list correctly without all parameters", () => {
-    const tree = [
-      PackageFactory.build({ name: "foo", version: "bar" }),
-      PackageFactory.build({ name: "hello", version: "world" }),
-    ] as NpmPackage[];
-
-    expect(getPackageNameAndVersion({ tree })).toEqual([
-      ["foo", "bar"],
-      ["hello", "world"],
-    ]);
   });
 });
 
@@ -188,17 +158,6 @@ describe("getVulnsCountText", () => {
     expect(getVulnsCountText(vulns)).toEqual(
       "There are currently 0 Critical, 1 High, 1 Medium, 0 Low and 0 Unknown severity vulnerabilities",
     );
-  });
-});
-
-describe("calculateTotalDependencyCount", () => {
-  test("Calculates total dependency count correctly", () => {
-    const tree = [
-      PackageFactory.build({ totalDependencies: 1 }),
-      PackageFactory.build({ totalDependencies: 0 }),
-    ] as NpmPackage[];
-
-    expect(calculateTotalDependencyCount(tree)).toEqual(3);
   });
 });
 

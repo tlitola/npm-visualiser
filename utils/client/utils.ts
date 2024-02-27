@@ -1,5 +1,6 @@
 import { PackageInfo, PackageVulnerability } from "../Package";
 import { NpmPackage } from "../PackageLock";
+import { DepGraph } from "dependency-graph";
 
 const dividers: [number, string][] = [
   [1e12, "T"],
@@ -27,59 +28,32 @@ export const packageSizeMissing = (data: Record<string, PackageInfo>) => {
   return Object.keys(data).length !== 0 && Object.values(data).some((el) => !el.unpackedSize || el.unpackedSize === 0);
 };
 
-export const getPackageNameAndVersion = ({
-  tree,
-  devTree,
-}: {
-  tree?: NpmPackage[];
-  devTree?: NpmPackage[];
-}): [string, string][] => [
-  ...((tree ?? []).map((el) => [el.name ?? "", el.version ?? ""]) as [string, string][]),
-  ...((devTree ?? []).map((el) => [el.name ?? "", el.version ?? ""]) as [string, string][]),
-];
-
-export const getDependencyNamesAndVersions = ({
-  tree,
-  devTree,
-}: {
-  tree?: NpmPackage[];
-  devTree?: NpmPackage[];
-}): [string, string][] => {
-  const dependencies = new Map<string, NpmPackage>();
-  tree?.forEach((el) => getAllDependencies(el).forEach((dep) => dependencies.set(`${dep.name}@${dep.version}`, dep)));
-  devTree?.forEach((el) =>
-    getAllDependencies(el).forEach((dep) => dependencies.set(`${dep.name}@${dep.version}`, dep)),
-  );
-
-  const result: [string, string][] = [];
-  dependencies.forEach((value) => {
-    result.push([value.name ?? "", value.version ?? ""]);
+export const getDependencyNamesAndVersions = (graph: DepGraph<NpmPackage>): [string, string][] => {
+  return Object.values(graph.nodes).map((dependency) => {
+    return [dependency.name ?? "", dependency.version ?? ""];
   });
-
-  return result;
 };
 
-export const getChildrenVulnerabilities = (dep: NpmPackage, vulns: Record<string, PackageVulnerability[]>) => {
-  const children = getAllDependencies(dep);
+export const getChildrenVulnerabilities = (
+  graphKey: string,
+  graph: DepGraph<NpmPackage>,
+  vulns: Record<string, PackageVulnerability[]>,
+) => {
+  const children = graph.directDependenciesOf(graphKey);
+  const dep = graph.getNodeData(graphKey);
 
   const childrenVulns: Record<string, PackageVulnerability[]> = {};
 
   children.forEach((el) => {
+    const child = graph.getNodeData(el);
     if (
-      `${el.name}@${el.version}` !== `${dep.name}@${dep.version}` &&
-      Object.hasOwn(vulns, `${el.name}@${el.version}`)
+      `${child.name}@${child.version}` !== `${dep.name}@${dep.version}` &&
+      Object.hasOwn(vulns, `${child.name}@${child.version}`)
     ) {
-      childrenVulns[`${el.name}@${el.version}`] = vulns[`${el.name}@${el.version}`];
+      childrenVulns[`${child.name}@${child.version}`] = vulns[`${child.name}@${child.version}`];
     }
   });
   return childrenVulns;
-};
-
-const getAllDependencies = (dependency: NpmPackage): NpmPackage[] => {
-  if (dependency.dependencies && dependency.dependencies?.length === 0) return [dependency];
-  return [dependency].concat(
-    (dependency.dependencies ?? []).reduce((acc, el) => acc.concat(getAllDependencies(el)), [] as NpmPackage[]),
-  );
 };
 
 export const findWorstVuln = (vulns: Record<string, PackageVulnerability[]>) => {
@@ -125,14 +99,6 @@ export const getVulnsCountText = (vulns: Record<string, PackageVulnerability[]>)
 
 export const capitalizeFirst = (s: string) => {
   return s[0].toUpperCase() + s.slice(1);
-};
-
-export const calculateTotalDependencyCount = (dependencies: NpmPackage[]) => {
-  return (
-    dependencies.reduce((acc, dep) => {
-      return acc + dep.totalDependencies;
-    }, 0) + dependencies.length
-  );
 };
 
 const severityOrder: { [key: string]: number } = {
