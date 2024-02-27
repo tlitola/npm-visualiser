@@ -72,7 +72,7 @@ export default function LockfileInput() {
 
   return (
     <>
-      <div className="tw-w-screen tw-relative">
+      <div className="tw-relative tw-w-screen">
         <DragAndDrop disabled={loadingStatus.isLoading} onFileChange={updateDependencyTree} className="tw-pb-6" />
         <p
           onClick={async () => {
@@ -85,7 +85,7 @@ export default function LockfileInput() {
             );
             await updateDependencyTree(file, () => {});
           }}
-          className="tw-italic tw-font-light tw-absolute -tw-bottom-2 tw-right-1/2 tw-translate-x-1/2 tw-cursor-pointer tw-text-gray-500 tw-underline hover:tw-text-gray-700"
+          className="tw-absolute -tw-bottom-2 tw-right-1/2 tw-translate-x-1/2 tw-cursor-pointer tw-font-light tw-italic tw-text-gray-500 tw-underline hover:tw-text-gray-700"
         >
           Use example lockfile
         </p>
@@ -93,13 +93,13 @@ export default function LockfileInput() {
       {loadingStatus.isLoading && (
         <>
           <div
-            className={`tw-z-0 tw-transition-all tw-bg-black tw-h-screen tw-w-screen tw-fixed tw-top-0 tw-left-0 tw-opacity-40 `}
+            className={`tw-fixed tw-left-0 tw-top-0 tw-z-0 tw-h-screen tw-w-screen tw-bg-black tw-opacity-40 tw-transition-all `}
           />
-          <Card className="!tw-h-1/2 tw-flex tw-flex-col tw-items-center tw-justify-center !tw-fixed tw-top-1/2 -tw-translate-y-1/2 tw-px-12 tw-w-5/6">
-            <h2 className="tw-w-[333px] tw-font-bold tw-text-slate-700 after:tw-inline-block after:tw-content-['…'] after:tw-align-bottom after:tw-overflow-hidden after:tw-w-0 after:tw-animate-dots">
+          <Card className="!tw-fixed tw-top-1/2 tw-flex !tw-h-1/2 tw-w-5/6 -tw-translate-y-1/2 tw-flex-col tw-items-center tw-justify-center tw-px-12">
+            <h2 className="tw-w-[333px] tw-font-bold tw-text-slate-700 after:tw-inline-block after:tw-w-0 after:tw-animate-dots after:tw-overflow-hidden after:tw-align-bottom after:tw-content-['…']">
               Parsing the lockfile
             </h2>
-            <p className="tw-text-slate-700 tw-font-medium tw-text-xl tw-mb-12">This should only take a few seconds</p>
+            <p className="tw-mb-12 tw-text-xl tw-font-medium tw-text-slate-700">This should only take a few seconds</p>
           </Card>
         </>
       )}

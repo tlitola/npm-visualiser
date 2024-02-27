@@ -53,7 +53,7 @@ export default function DependencyNode({
   return (
     <>
       <span
-        className="tw-flex tw-items-center tw-justify-start tw-p-1 tw-w-full tw-cursor-pointer hover:tw-bg-gray-100 tw-rounded"
+        className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-start tw-rounded tw-p-1 hover:tw-bg-gray-100"
         ref={nodeRef}
         onClick={() => {
           setShowModal(true);
@@ -62,12 +62,12 @@ export default function DependencyNode({
         <Link
           href={`${baseLink}${dependency.name ?? ""}`}
           target="_blank"
-          className="!tw-mr-2 tw-my-0 tw-ml-0 tw-text-black tw-no-underline tw-peer"
+          className="tw-peer tw-my-0 !tw-mr-2 tw-ml-0 tw-text-black tw-no-underline"
           onClick={(e) => e.stopPropagation()}
         >
           {dependency.name}
         </Link>
-        <FontAwesomeIcon className="tw-mr-2 tw-h-3 tw-hidden peer-hover:tw-block" icon={faArrowUpRightFromSquare} />
+        <FontAwesomeIcon className="tw-mr-2 tw-hidden tw-h-3 peer-hover:tw-block" icon={faArrowUpRightFromSquare} />
 
         <Stack direction="horizontal" gap={2}>
           <Tag params={{ type: "version", version: dependency.version ?? "" }} />

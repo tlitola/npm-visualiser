@@ -38,7 +38,7 @@ export default function DTPageHeader({
             />
           )}
         </Stack>
-        <Link href="/" className="tw-text-black tw-ml-1 tw-font-medium">
+        <Link href="/" className="tw-ml-1 tw-font-medium tw-text-black">
           Process another lockfile
         </Link>
       </Col>
@@ -51,19 +51,19 @@ export default function DTPageHeader({
               dependencyGraph.graph.entryNodes().length
             } of which are direct. Transitively, the package has ${dependencyGraph.graph.size()} dependencies.`}
           >
-            <Card.Title className="!tw-text-base tw-text-center  !-tw-mb-2 !tw-mt-2">Dependencies</Card.Title>
-            <Card.Body className="tw-text-center tw-mt-2">{dependencyGraph.graph.size()}</Card.Body>
-            <Card.Footer className="tw-font-light tw-text-sm tw-text-center tw-mt-[1px]">{`Direct: ${
+            <Card.Title className="!-tw-mb-2 !tw-mt-2  tw-text-center !tw-text-base">Dependencies</Card.Title>
+            <Card.Body className="tw-mt-2 tw-text-center">{dependencyGraph.graph.size()}</Card.Body>
+            <Card.Footer className="tw-mt-[1px] tw-text-center tw-text-sm tw-font-light">{`Direct: ${
               dependencyGraph.graph.entryNodes().length
             }`}</Card.Footer>
           </Card>
           <Card className="!tw-h-32 tw-w-32" title={vulns && getVulnsCountText(vulns)}>
-            <Card.Title className="!tw-text-base tw-text-center !-tw-mb-2 !tw-mt-2">Vulnerabilities</Card.Title>
-            <Card.Body className="tw-text-center tw-mt-2">
+            <Card.Title className="!-tw-mb-2 !tw-mt-2 tw-text-center !tw-text-base">Vulnerabilities</Card.Title>
+            <Card.Body className="tw-mt-2 tw-text-center">
               {vulns ? getVulnsCount(vulns) : <Skeleton className="!tw-w-3/4" />}
             </Card.Body>
             <Card.Footer
-              className={`tw-font-light tw-text-sm tw-text-center bg-vuln-${findWorstVuln(
+              className={`bg-vuln- tw-text-center tw-text-sm tw-font-light${findWorstVuln(
                 vulns ?? {},
               ).toLowerCase()} tw-mt-[1px]`}
             >
@@ -71,10 +71,10 @@ export default function DTPageHeader({
             </Card.Footer>
           </Card>
           <Card className="!tw-h-32 tw-w-32 " title="Size of all dependencies combined">
-            <Card.Title className="!tw-text-base tw-text-center !-tw-mb-2 !tw-mt-2">Download size</Card.Title>
+            <Card.Title className="!-tw-mb-2 !tw-mt-2 tw-text-center !tw-text-base">Download size</Card.Title>
             <Card.Body
               className={`text-center  tw-mt-2 ${
-                packageInfo && "tw-flex tw-flex-row tw-items-center tw-px-0 tw-mx-auto"
+                packageInfo && "tw-mx-auto tw-flex tw-flex-row tw-items-center tw-px-0"
               }`}
             >
               {packageInfo ? calculateDownloadSize(packageInfo) : <Skeleton className="!tw-w-3/4" />}
@@ -82,7 +82,7 @@ export default function DTPageHeader({
                 <FontAwesomeIcon title="Couldn't find the size of some packages" className="tw-ml-2" icon={faWarning} />
               )}
             </Card.Body>
-            <Card.Footer className="tw-font-light tw-text-sm tw-text-center tw-mt-[1px]">Unpacked</Card.Footer>
+            <Card.Footer className="tw-mt-[1px] tw-text-center tw-text-sm tw-font-light">Unpacked</Card.Footer>
           </Card>
         </Stack>
       </Col>

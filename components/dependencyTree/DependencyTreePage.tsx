@@ -28,8 +28,8 @@ export default function DependencyTreePage() {
   return dependencyGraph ? (
     <>
       <DTPageHeader vulns={vulns} packageInfo={packageInfo} dependencyGraph={dependencyGraph} />
-      <Row className="tw-w-full tw-h-full tw-overflow-y-scroll tw-p-2 tw-py-0 tw-rounded-sm tw-shadow tw-content-start tw-scroll-pt-24 tw-scroll-smooth">
-        <Tabs defaultActiveKey={"dependencies"} className="tw-sticky tw-top-0 tw-bg-white tw-h-fit">
+      <Row className="tw-h-full tw-w-full tw-scroll-pt-24 tw-content-start tw-overflow-y-scroll tw-scroll-smooth tw-rounded-sm tw-p-2 tw-py-0 tw-shadow">
+        <Tabs defaultActiveKey={"dependencies"} className="tw-sticky tw-top-0 tw-h-fit tw-bg-white">
           <Tab
             eventKey={"dependencies"}
             title={

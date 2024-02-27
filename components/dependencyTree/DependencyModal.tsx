@@ -70,7 +70,7 @@ export default function DependencyModal({
         </Stack>
         <CloseButton className="tw-absolute tw-right-6 tw-top-6" onClick={hide} />
       </Modal.Header>
-      <Modal.Body className="tw-px-4 tw-pb-4 tw-overflow-scroll tw-max-h-[calc(94vh-41px-110px)]">
+      <Modal.Body className="tw-max-h-[calc(94vh-41px-110px)] tw-overflow-scroll tw-px-4 tw-pb-4">
         <Row>
           <Col sm={7} className="tw-border-r-[1px] tw-border-r-gray-200">
             <ModalTitle>Description</ModalTitle>
@@ -85,7 +85,7 @@ export default function DependencyModal({
                     <Stack
                       key={el.name}
                       direction="horizontal"
-                      className="tw-justify-between tw-w-full tw-items-center"
+                      className="tw-w-full tw-items-center tw-justify-between"
                     >
                       <p className="tw-my-auto">{el.id}</p>
                       <Stack direction="horizontal">
@@ -93,12 +93,12 @@ export default function DependencyModal({
                           <p
                             className={`bg-vuln-${
                               el.severity?.text ?? "Unknown"
-                            } tw-py-[1px] tw-px-2 tw-rounded-lg tw-my-auto tw-mr-4`}
+                            } tw-my-auto tw-mr-4 tw-rounded-lg tw-px-2 tw-py-[1px]`}
                           >
                             {capitalizeFirst(el.severity?.text)}
                           </p>
                         )}
-                        <Accordion.Button className="tw-w-auto !tw-shadow-none !tw-bg-transparent tw-p-0" />
+                        <Accordion.Button className="tw-w-auto !tw-bg-transparent tw-p-0 !tw-shadow-none" />
                       </Stack>
                     </Stack>
                     <Accordion.Body className="tw-pt-1">
@@ -122,8 +122,8 @@ export default function DependencyModal({
           </Col>
           <Col sm={5}>
             <ModalTitle>{downloads[0]}</ModalTitle>
-            <Stack direction={"horizontal"} className="tw-border-b-[1px] tw-h-[50px] tw-border-b-gray-200 !tw-mb-4">
-              <p className="tw-mr-4 tw-mt-auto tw-mb-0 tw-font-medium tw-w-1/2">{downloads[1]?.toLocaleString("en")}</p>
+            <Stack direction={"horizontal"} className="!tw-mb-4 tw-h-[50px] tw-border-b-[1px] tw-border-b-gray-200">
+              <p className="tw-mb-0 tw-mr-4 tw-mt-auto tw-w-1/2 tw-font-medium">{downloads[1]?.toLocaleString("en")}</p>
               <DownloadsChart packageName={dependency.name ?? ""} updateValue={setDownloads} />
             </Stack>
             <Row>
@@ -152,5 +152,5 @@ export default function DependencyModal({
 }
 
 function ModalTitle({ children }: PropsWithChildren) {
-  return <h6 className="tw-text-gray-700 tw-mb-1">{children}</h6>;
+  return <h6 className="tw-mb-1 tw-text-gray-700">{children}</h6>;
 }

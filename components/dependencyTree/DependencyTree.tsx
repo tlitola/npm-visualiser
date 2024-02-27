@@ -19,9 +19,9 @@ export default function DependencyTree({
   return (
     <>
       {dependencies.length === 0 && (
-        <p className="tw-text-center tw-pt-1">Lockfile provided does not contain any {type}</p>
+        <p className="tw-pt-1 tw-text-center">Lockfile provided does not contain any {type}</p>
       )}
-      <section id="" className="tw-flex tw-flex-col tw-items-start tw-min-w-full tw-pt-1">
+      <section id="" className="tw-flex tw-min-w-full tw-flex-col tw-items-start tw-pt-1">
         {dependencies.map((el) => {
           const dependency = graph.getNodeData(el);
           return (

@@ -79,7 +79,7 @@ export default function DragAndDrop({
       <div
         className={`${
           !dragging && "tw-hidden "
-        } tw-z-0 tw-transition-all tw-bg-black tw-h-screen tw-w-screen tw-fixed tw-top-0 tw-left-0 tw-opacity-20 ${
+        } tw-fixed tw-left-0 tw-top-0 tw-z-0 tw-h-screen tw-w-screen tw-bg-black tw-opacity-20 tw-transition-all ${
           droppable && "tw-opacity-10"
         } tw-pointer-events-none`}
       />
@@ -89,7 +89,7 @@ export default function DragAndDrop({
           error ? "!tw-bg-rose-100" : droppable ? "!tw-bg-blue-100" : "!tw-bg-white"
         } tw-border-2 ${
           !droppable ? (dragging ? "!tw-border-dashed" : "border-transparent") : "!tw-border-solid"
-        } tw-transition-all tw-box-border tw-shadow tw-p-3 ${className}`}
+        } tw-box-border tw-p-3 tw-shadow tw-transition-all ${className}`}
         onDragEnter={startDrag}
         onDragLeave={stopDrag}
         onDrop={handleDrop}
@@ -98,13 +98,13 @@ export default function DragAndDrop({
           startWindowDrag(e);
         }}
       >
-        <CardBody className="tw-text-center !tw-space-y-3">
+        <CardBody className="!tw-space-y-3 tw-text-center">
           {/* The icon seems to cause shifting*/}
-          <FontAwesomeIcon icon={faFileArrowDown} className={`tw-w-24 tw-h-24 tw-m-auto`} />
-          <CardTitle className={`${droppable && "!tw-text-blue-600"} tw-text-center tw-m-0 tw-transition-all`}>{`${
+          <FontAwesomeIcon icon={faFileArrowDown} className={`tw-m-auto tw-h-24 tw-w-24`} />
+          <CardTitle className={`${droppable && "!tw-text-blue-600"} tw-m-0 tw-text-center tw-transition-all`}>{`${
             !droppable ? "Drag and " : ""
           }Drop here to start`}</CardTitle>
-          <CardText className={`${droppable && "tw-text-blue-600"} tw-text-center m-0`}>or</CardText>
+          <CardText className={`${droppable && "tw-text-blue-600"} m-0 tw-text-center`}>or</CardText>
 
           <input accept=".json" ref={fileInputRef} type="file" className="tw-hidden" onChange={handleFileSubmit} />
           <Button
