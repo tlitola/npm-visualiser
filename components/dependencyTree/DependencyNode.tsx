@@ -1,38 +1,29 @@
-import { NpmPackage } from "@/utils/PackageLock";
 import { faArrowUpRightFromSquare, faCaretDown, faCaretUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useRef, useState } from "react";
-import Tag from "../Tag";
-import { Stack } from "react-bootstrap";
-import { PackageInfo, PackageVulnerability } from "@/utils/Package";
-import { findWorstVuln, getChildrenVulnerabilities } from "@/utils/client/utils";
 import DependencyModal from "./DependencyModal";
-import { DepGraph } from "dependency-graph";
-
-const baseLink = "https://www.npmjs.com/package/";
+import { useDependencyGraph } from "@/utils/hooks/useDependencyGraph";
+import { DependencyNodeIcons } from "@/components/dependencyTree/DependencyNodeIcons";
+import { NPM_API_BASE_URL } from "@/utils/constants/constants";
 
 export default function DependencyNode({
-  graph,
   dependencyKey,
   depth,
   parents,
-  packageInfo,
-  vulns,
 }: {
-  graph: DepGraph<NpmPackage>;
   dependencyKey: string;
   depth: number;
   parents: Record<string, () => void>;
-  packageInfo: Record<string, PackageInfo>;
-  vulns: Record<string, PackageVulnerability[]>;
 }) {
-  const [open, setOpen] = useState(false);
+  const graph = useDependencyGraph().graph;
+
+  const [expanded, setExpanded] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
   const nodeRef = useRef<HTMLSpanElement>(null);
 
-  const hightlightNode = async () => {
+  const highlightNode = async () => {
     if (!nodeRef.current) return;
 
     nodeRef.current.scrollIntoView();
@@ -48,7 +39,7 @@ export default function DependencyNode({
 
   const dependency = graph.getNodeData(dependencyKey);
   const dependencies = graph.directDependenciesOf(dependencyKey);
-  const cyclic = Object.hasOwn(parents, `${dependency.name}-${dependency.version}`);
+  const cyclic = Object.hasOwn(parents, dependency.integrity);
 
   return (
     <>
@@ -60,7 +51,7 @@ export default function DependencyNode({
         }}
       >
         <Link
-          href={`${baseLink}${dependency.name ?? ""}`}
+          href={`${NPM_API_BASE_URL}${dependency.name ?? ""}`}
           target="_blank"
           className="tw-peer tw-my-0 !tw-mr-2 tw-ml-0 tw-text-black tw-no-underline"
           onClick={(e) => e.stopPropagation()}
@@ -69,89 +60,49 @@ export default function DependencyNode({
         </Link>
         <FontAwesomeIcon className="tw-mr-2 tw-hidden tw-h-3 peer-hover:tw-block" icon={faArrowUpRightFromSquare} />
 
-        <Stack direction="horizontal" gap={2}>
-          <Tag params={{ type: "version", version: dependency.version ?? "" }} />
-          {cyclic && (
-            <Tag
-              params={{ type: "circular" }}
-              onClick={(e) => {
-                e.stopPropagation();
-                parents[`${dependency.name}-${dependency.version}`]();
-              }}
-            />
-          )}
-          {Object.hasOwn(vulns, dependency.name + "@" + dependency.version) && (
-            <Tag
-              params={{
-                type: "danger",
-                severity: findWorstVuln({
-                  "": vulns[dependency.name + "@" + dependency.version],
-                }),
-              }}
-            />
-          )}
-          {Object.keys(getChildrenVulnerabilities(dependencyKey, graph, vulns)).length !== 0 && (
-            <Tag
-              params={{
-                type: "dangerChildren",
-                severity: findWorstVuln(getChildrenVulnerabilities(dependencyKey, graph, vulns)),
-              }}
-            />
-          )}
-          {packageInfo[dependency.name + "@" + dependency.version]?.unpackedSize === 0 && (
-            <Tag
-              params={{
-                type: "warning",
-                message: "Couldn't fetch the size of this package",
-              }}
-            />
-          )}
-        </Stack>
-
+        <DependencyNodeIcons
+          dependencyKey={dependencyKey}
+          cyclic={cyclic}
+          onCyclicClick={(e) => {
+            e.stopPropagation();
+            parents[dependency.integrity]();
+          }}
+        />
+        {/*Expand dependency tree*/}
         {dependencies.length > 0 && !cyclic && (
           <FontAwesomeIcon
             className="tw-ml-3 tw-select-none tw-text-gray-500 hover:tw-text-black"
             role="button"
             onClick={(e) => {
               e.stopPropagation();
-              setOpen((prev) => !prev);
+              setExpanded((prev) => !prev);
             }}
-            icon={open ? faCaretUp : faCaretDown}
+            icon={expanded ? faCaretUp : faCaretDown}
           />
         )}
       </span>
-      {open && dependencies.length > 0 && (
+      {expanded && dependencies.length > 0 && (
         <section
           style={{ marginLeft: 16 * depth, minWidth: `calc(100% - ${16 * depth}px` }}
           className={`tw-flex tw-flex-col tw-items-start`}
         >
-          {dependencies.map((el) => {
-            const dep = graph.getNodeData(el);
+          {dependencies.map((key) => {
+            const dep = graph.getNodeData(key);
             return (
               <DependencyNode
-                vulns={vulns}
                 parents={{
                   ...parents,
-                  [`${dependency.name}-${dependency.version}`]: hightlightNode,
+                  [dependency.integrity]: highlightNode,
                 }}
-                key={`${dep.name}-${dep.version}-${depth}`}
-                graph={graph}
-                dependencyKey={el}
+                key={`${depth}-${dep.name}@${dep.version}`}
+                dependencyKey={key}
                 depth={depth + 1}
-                packageInfo={packageInfo}
               />
             );
           })}
         </section>
       )}
-      <DependencyModal
-        info={packageInfo[dependency.name + "@" + dependency.version]}
-        show={showModal}
-        hide={() => setShowModal(false)}
-        vulns={vulns[dependency.name + "@" + dependency.version]}
-        graph={graph}
-        dependencyKey={dependencyKey}
-      />
+      <DependencyModal show={showModal} hide={() => setShowModal(false)} dependencyKey={dependencyKey} />
     </>
   );
 }

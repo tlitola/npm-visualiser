@@ -1,9 +1,5 @@
-import DependencyTreePage from "@/components/dependencyTree/DependencyTreePage";
+import DependencyPanel from "@/components/dependencyTree/DependencyPanel";
 
-export default function Home() {
-  return (
-    <main className="tw-flex tw-h-screen tw-flex-col tw-items-center tw-bg-gray-50 tw-px-4 tw-py-16 ">
-      <DependencyTreePage />
-    </main>
-  );
+export default function Report() {
+  return <DependencyPanel />;
 }

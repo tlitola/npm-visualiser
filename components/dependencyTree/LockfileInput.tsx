@@ -10,7 +10,6 @@ import { useRouter } from "next/navigation";
 import { useSWRConfig } from "swr";
 import { DepGraph } from "dependency-graph";
 import { createDependencyGraph } from "@/utils/client/dependencyTreeParser";
-import { getDependencyNamesAndVersions } from "@/utils/client/utils";
 import Loading from "@/components/loading/Loading";
 
 const { signal } = new AbortController();
@@ -21,7 +20,6 @@ export interface DependencyGraph {
   graph: DepGraph<NpmPackage>;
   dependencies?: string[];
   devDependencies?: string[];
-  dependencyList: [string, string][];
 }
 
 export default function LockfileInput() {
@@ -61,7 +59,6 @@ export default function LockfileInput() {
         devDependencies: lockFile.packages[""].devDependencies
           ? Object.keys(lockFile.packages[""].devDependencies)
           : undefined,
-        dependencyList: getDependencyNamesAndVersions(graph),
       });
 
       router.push("/report");
@@ -74,7 +71,7 @@ export default function LockfileInput() {
   return (
     <>
       <div className="tw-relative tw-w-screen">
-        <DragAndDrop disabled={loadingStatus.isLoading} onFileChange={updateDependencyTree} className="tw-pb-6" />
+        <DragAndDrop disabled={loadingStatus.isLoading} onFileInput={updateDependencyTree} className="tw-pb-6" />
         <p
           onClick={async () => {
             const file = new File(

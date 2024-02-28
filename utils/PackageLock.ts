@@ -7,12 +7,12 @@ export const npmPackage = z
     //There doesn't seem to be a way to merge z.object and z.record without the rules of the latter affecting the first one
     //Version should be optional with key "" but required otherwise, hence offer default if the version is missing
     version: z.string().default("undefined"),
-    resolved: z.string(),
-    integrity: z.string(),
+    resolved: z.string().default("undefined"),
+    integrity: z.string().default("undefined"),
     optional: z.boolean(),
     peer: z.boolean(),
   })
-  .partial()
+  .partial({ peer: true, optional: true, name: true })
   .passthrough();
 
 export type NpmPackage = z.infer<typeof npmPackage>;
@@ -37,6 +37,8 @@ export const packageLock = z.object({
         //There doesn't seem to be a way to merge z.object and z.record without the rules of the latter affecting the first one
         //Version should be optional with key "" but required otherwise, hence offer default if the version is missing
         version: z.string().default("undefined"),
+        resolved: z.string().default("undefined"),
+        integrity: z.string().default("undefined"),
         dependencies: z.record(z.string()).optional(),
         devDependencies: z.record(z.string()).optional(),
       }),

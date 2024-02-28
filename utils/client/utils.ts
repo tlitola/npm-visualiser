@@ -1,6 +1,7 @@
 import { PackageInfo, PackageVulnerability } from "../Package";
 import { NpmPackage } from "../PackageLock";
 import { DepGraph } from "dependency-graph";
+import { CVSSThreadLevel, ThreadLevels, VULNERABILITY_SEVERITY_ORDER } from "@/utils/constants/constants";
 
 const dividers: [number, string][] = [
   [1e12, "T"],
@@ -28,60 +29,54 @@ export const packageSizeMissing = (data: Record<string, PackageInfo>) => {
   return Object.keys(data).length !== 0 && Object.values(data).some((el) => !el.unpackedSize || el.unpackedSize === 0);
 };
 
-export const getDependencyNamesAndVersions = (graph: DepGraph<NpmPackage>): [string, string][] => {
-  return Object.values(graph.nodes).map((dependency) => {
-    return [dependency.name ?? "", dependency.version ?? ""];
-  });
-};
-
 export const getChildrenVulnerabilities = (
   graphKey: string,
   graph: DepGraph<NpmPackage>,
   vulns: Record<string, PackageVulnerability[]>,
 ) => {
-  const children = graph.directDependenciesOf(graphKey);
+  const children = graph.dependenciesOf(graphKey);
   const dep = graph.getNodeData(graphKey);
 
   const childrenVulns: Record<string, PackageVulnerability[]> = {};
 
   children.forEach((el) => {
     const child = graph.getNodeData(el);
-    if (
-      `${child.name}@${child.version}` !== `${dep.name}@${dep.version}` &&
-      Object.hasOwn(vulns, `${child.name}@${child.version}`)
-    ) {
-      childrenVulns[`${child.name}@${child.version}`] = vulns[`${child.name}@${child.version}`];
+    if (dep.integrity !== child.integrity && Object.hasOwn(vulns, child.integrity)) {
+      childrenVulns[child.integrity] = vulns[child.integrity];
     }
   });
   return childrenVulns;
 };
 
-export const findWorstVuln = (vulns: Record<string, PackageVulnerability[]>) => {
+export const findWorstVulnerability = (vulns: Record<string, PackageVulnerability[]>): string => {
   const text = Object.values(vulns).reduce(
     (acc, el) => {
       return el.reduce((acc2, vuln) => {
-        if (!vuln.severity && acc[1] === "safe") return [0, "unknown"];
+        if (!vuln.severity && acc[1] === ThreadLevels.Safe)
+          return [0, ThreadLevels.Unknown] as [number, CVSSThreadLevel];
         if (!vuln.severity) return acc2;
-        return (acc2[0] as number) >= vuln.severity?.score ? acc2 : [vuln.severity?.score, vuln.severity?.text];
+        return (acc2[0] as number) >= vuln.severity?.score
+          ? acc2
+          : ([vuln.severity?.score, vuln.severity?.text] as [number, CVSSThreadLevel]);
       }, acc);
     },
-    [0, "safe"],
-  )[1] as string;
+    [0, ThreadLevels.Safe] as [number, CVSSThreadLevel],
+  )[1];
 
-  return capitalizeFirst(text) as CVSSThreadLevel;
+  return (Object.values(ThreadLevels) as string[]).includes(text)
+    ? capitalizeFirst(text)
+    : capitalizeFirst(ThreadLevels.Unknown);
 };
 
-export type CVSSThreadLevel = "Low" | "Medium" | "High" | "Critical" | "Unknown";
-
-export const getVulnsCount = (vulns: Record<string, PackageVulnerability[]>) => {
+export const getVulnerabilityCount = (vulns: Record<string, PackageVulnerability[]>) => {
   return Object.values(vulns).reduce((acc, vuln) => acc + vuln.length, 0);
 };
 
-export const getVulnCounts = (vulns: Record<string, PackageVulnerability[]>) => {
+export const getVulnerabilitySeverities = (vulns: Record<string, PackageVulnerability[]>) => {
   return Object.values(vulns).reduce(
     (acc, vuln) => {
       vuln.forEach((vuln2) => {
-        const key = capitalizeFirst(vuln2.severity?.text ?? "Unknown") as CVSSThreadLevel;
+        const key = vuln2.severity?.text ?? ThreadLevels.Unknown;
         acc[key] = (acc[key] ?? 0) + 1;
       });
       return acc;
@@ -90,27 +85,21 @@ export const getVulnCounts = (vulns: Record<string, PackageVulnerability[]>) => 
   );
 };
 
-export const getVulnsCountText = (vulns: Record<string, PackageVulnerability[]>) => {
-  const counts = getVulnCounts(vulns);
-  return `There are currently ${counts.Critical ?? 0} Critical, ${counts.High ?? 0} High, ${
-    counts.Medium ?? 0
-  } Medium, ${counts.Low ?? 0} Low and ${counts.Unknown ?? 0} Unknown severity vulnerabilities`;
+export const getVulnerabilityCountText = (vulns: Record<string, PackageVulnerability[]>) => {
+  const counts = getVulnerabilitySeverities(vulns);
+  return `There are currently ${counts.critical ?? 0} Critical, ${counts.high ?? 0} High, ${
+    counts.medium ?? 0
+  } Medium, ${counts.low ?? 0} Low and ${counts.unknown ?? 0} Unknown severity vulnerabilities`;
 };
 
-export const capitalizeFirst = (s: string) => {
+export const capitalizeFirst = <TString extends string>(s: TString) => {
   return s[0].toUpperCase() + s.slice(1);
 };
 
-const severityOrder: { [key: string]: number } = {
-  Critical: 0,
-  High: 1,
-  Medium: 2,
-  Low: 3,
-  Unknown: 4,
-};
-
-export const sortBySeverity = (vulns?: PackageVulnerability[]) =>
-  [...(vulns ?? [])].sort(
+export const sortBySeverity = (vulns: PackageVulnerability[]) => {
+  return [...(vulns ?? [])].sort(
     (vuln1, vuln2) =>
-      severityOrder[vuln1.severity?.text ?? "Unknown"] - severityOrder[vuln2.severity?.text ?? "Unknown"],
+      VULNERABILITY_SEVERITY_ORDER[vuln1.severity?.text ?? ThreadLevels.Unknown] -
+      VULNERABILITY_SEVERITY_ORDER[vuln2.severity?.text ?? ThreadLevels.Unknown],
   );
+};

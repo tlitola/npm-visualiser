@@ -1,8 +1,8 @@
-import { CVSSThreadLevel } from "@/utils/client/utils";
 import { faCircleExclamation, faRotateBack, faWarning } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ComponentPropsWithoutRef } from "react";
 import { Badge } from "react-bootstrap";
+import { CVSSThreadLevel } from "@/utils/constants/constants";
 
 export default function Tag({
   params,

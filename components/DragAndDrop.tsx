@@ -4,12 +4,12 @@ import { DragEventHandler, useEffect, useRef, useState } from "react";
 import { Button, Card, CardBody, CardText, CardTitle } from "react-bootstrap";
 
 export default function DragAndDrop({
-  onFileChange,
+  onFileInput,
   disabled,
   className,
 }: {
   disabled: boolean;
-  onFileChange: (file: File, setError: (error?: string) => void) => void;
+  onFileInput: (file: File, setError: (error?: string) => void) => void;
   className?: string;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -41,35 +41,35 @@ export default function DragAndDrop({
     setDragging(false);
     setDroppable(false);
 
-    if (!disabled && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      onFileChange(e.dataTransfer.files[0], setError);
+    if (!disabled && e.dataTransfer.files && e.dataTransfer.files.length === 0) {
+      onFileInput(e.dataTransfer.files[0], setError);
     }
   };
 
   const handleFileSubmit = () => {
     if (!disabled && fileInputRef.current?.files && fileInputRef.current.files.length > 0) {
-      onFileChange(fileInputRef.current.files[0], setError);
+      onFileInput(fileInputRef.current.files[0], setError);
     }
   };
 
   useEffect(() => {
-    //@ts-expect-error Typings of the windown.addEventListener and DragEventHandler seems to give unnecessary error.
+    //@ts-expect-error Typings of the window.addEventListener and DragEventHandler seems to give unnecessary error.
     window.addEventListener("dragenter", startWindowDrag);
-    //@ts-expect-error Typings of the windown.addEventListener and DragEventHandler seems to give unnecessary error.
+    //@ts-expect-error Typings of the window.addEventListener and DragEventHandler seems to give unnecessary error.
     window.addEventListener("drop", stopWindowDrag);
-    //@ts-expect-error Typings of the windown.addEventListener and DragEventHandler seems to give unnecessary error.
+    //@ts-expect-error Typings of the window.addEventListener and DragEventHandler seems to give unnecessary error.
     window.addEventListener("dragover", startWindowDrag);
-    //@ts-expect-error Typings of the windown.addEventListener and DragEventHandler seems to give unnecessary error.
+    //@ts-expect-error Typings of the window.addEventListener and DragEventHandler seems to give unnecessary error.
     window.addEventListener("dragleave", stopWindowDrag);
 
     return () => {
-      //@ts-expect-error Typings of the windown.addEventListener and DragEventHandler seems to give unnecessary error.
+      //@ts-expect-error Typings of the window.addEventListener and DragEventHandler seems to give unnecessary error.
       window.removeEventListener("dragenter", startWindowDrag);
-      //@ts-expect-error Typings of the windown.removeEventListener and DragEventHandler seems to give unnecessary error.
+      //@ts-expect-error Typings of the window.removeEventListener and DragEventHandler seems to give unnecessary error.
       window.removeEventListener("drop", stopWindowDrag);
-      //@ts-expect-error Typings of the windown.removeEventListener and DragEventHandler seems to give unnecessary error.
+      //@ts-expect-error Typings of the window.removeEventListener and DragEventHandler seems to give unnecessary error.
       window.removeEventListener("dragover", startWindowDrag);
-      //@ts-expect-error Typings of the windown.removeEventListener and DragEventHandler seems to give unnecessary error.
+      //@ts-expect-error Typings of the window.removeEventListener and DragEventHandler seems to give unnecessary error.
       window.removeEventListener("dragleave", stopWindowDrag);
     };
   }, []);

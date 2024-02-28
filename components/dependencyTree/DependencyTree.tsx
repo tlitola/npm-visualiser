@@ -1,21 +1,8 @@
-import { NpmPackage } from "@/utils/PackageLock";
 import DependencyNode from "./DependencyNode";
-import { PackageInfo, PackageVulnerability } from "@/utils/Package";
-import { DepGraph } from "dependency-graph";
+import { useDependencyGraph } from "@/utils/hooks/useDependencyGraph";
 
-export default function DependencyTree({
-  dependencies,
-  graph,
-  type,
-  packageInfo,
-  vulns,
-}: {
-  dependencies: string[];
-  graph: DepGraph<NpmPackage>;
-  type: string;
-  packageInfo: Record<string, PackageInfo>;
-  vulns: Record<string, PackageVulnerability[]>;
-}) {
+export default function DependencyTree({ dependencies, type }: { dependencies: string[]; type: string }) {
+  const graph = useDependencyGraph().graph;
   return (
     <>
       {dependencies.length === 0 && (
@@ -26,13 +13,10 @@ export default function DependencyTree({
           const dependency = graph.getNodeData(el);
           return (
             <DependencyNode
-              graph={graph}
               dependencyKey={el}
-              vulns={vulns}
-              packageInfo={packageInfo}
               parents={{}}
               depth={1}
-              key={`${dependency.name}-${dependency.version}`}
+              key={`0-${dependency.name}@${dependency.version}`}
             />
           );
         })}
