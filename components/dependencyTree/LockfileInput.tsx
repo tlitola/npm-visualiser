@@ -8,7 +8,7 @@ import useSWRMutation from "swr/mutation";
 import { useRouter } from "next/navigation";
 import { useSWRConfig } from "swr";
 import { DepGraph } from "dependency-graph";
-import { createDependencyGraph } from "@/utils/client/dependencyTreeParser";
+import { createDependencyGraph } from "@/utils/client/dependencyGraphParser";
 
 const { signal } = new AbortController();
 

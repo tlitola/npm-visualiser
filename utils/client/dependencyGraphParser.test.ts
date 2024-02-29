@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { packageLock } from "../PackageLock";
 import package_lock_v3 from "../../test/fixtures/package_lock_v3.json";
-import { createDependencyGraph } from "./dependencyTreeParser";
+import { createDependencyGraph } from "./dependencyGraphParser";
 import { DepGraph } from "dependency-graph";
 
 describe("createDependencyGraph", () => {
