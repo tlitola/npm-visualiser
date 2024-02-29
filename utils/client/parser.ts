@@ -1,19 +1,13 @@
 import { PackageLock, packageLock } from "../PackageLock";
 
-export const readLockFile = async (
-  file: File,
-  updateLoadingStatus?: (status: boolean) => void,
-): Promise<PackageLock> => {
+export const readLockFile = async (file: File): Promise<PackageLock> => {
   if (file?.type !== "application/json") throw new Error("Couldn't parse the file, please make sure it is valid JSON");
-  updateLoadingStatus && updateLoadingStatus(true);
-
   const text = await file.text();
 
   let json;
   try {
     json = JSON.parse(text);
   } catch (error) {
-    updateLoadingStatus && updateLoadingStatus(false);
     throw new Error("Couldn't parse the file, please make sure it is valid JSON");
   }
 
@@ -21,7 +15,6 @@ export const readLockFile = async (
 
   if (!result.success) {
     console.log(result.error.toString());
-    updateLoadingStatus && updateLoadingStatus(false);
     throw new Error("Please make sure your package-lock file follows the standard of lockfile version 3");
   }
 

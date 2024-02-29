@@ -2,17 +2,15 @@ import { describe, expect, test } from "vitest";
 import {
   addMetricSuffix,
   calculateDownloadSize,
-  calculateTotalDependencyCount,
-  findWorstVuln,
-  getPackageNameAndVersion,
-  getVulnCounts,
-  getVulnsCountText,
+  findWorstVulnerability,
+  getVulnerabilityCountText,
+  getVulnerabilitySeverities,
   packageSizeMissing,
   sortBySeverity,
 } from "./utils";
-import { PackageFactory, PackageInfoFactory, buildPackageInfoRecord } from "../../test/factories/packageInfoFactory";
-import { NpmPackage } from "../PackageLock";
-import { VulnerabilityFactory, buildVulnerabilitiesRecord } from "../../test/factories/vulnerabilityFactory";
+import { buildPackageInfoRecord, PackageInfoFactory } from "@/test/factories/packageInfoFactory";
+import { buildVulnerabilitiesRecord, VulnerabilityFactory } from "@/test/factories/vulnerabilityFactory";
+import { ThreatLevels } from "../constants/constants";
 
 describe("addMetricSuffix", () => {
   test("Adds correct suffix", () => {
@@ -68,33 +66,6 @@ describe("packageSizeMissing", () => {
   });
 });
 
-describe("getPackageNameAndVersion", () => {
-  test("Creates list correctly", () => {
-    const tree = [
-      PackageFactory.build({ name: "foo", version: "bar" }),
-      PackageFactory.build({ name: "hello", version: "world" }),
-    ] as NpmPackage[];
-
-    expect(getPackageNameAndVersion({ tree, devTree: tree })).toEqual([
-      ["foo", "bar"],
-      ["hello", "world"],
-      ["foo", "bar"],
-      ["hello", "world"],
-    ]);
-  });
-  test("Creates list correctly without all parameters", () => {
-    const tree = [
-      PackageFactory.build({ name: "foo", version: "bar" }),
-      PackageFactory.build({ name: "hello", version: "world" }),
-    ] as NpmPackage[];
-
-    expect(getPackageNameAndVersion({ tree })).toEqual([
-      ["foo", "bar"],
-      ["hello", "world"],
-    ]);
-  });
-});
-
 describe("findWorstVuln", () => {
   test("Finds worst vulnerability", () => {
     const vulns = buildVulnerabilitiesRecord(
@@ -102,14 +73,14 @@ describe("findWorstVuln", () => {
         VulnerabilityFactory.build({
           severity: {
             score: 7.4,
-            text: "High",
+            text: ThreatLevels.High,
           },
         }),
       ],
       [VulnerabilityFactory.build()],
     );
 
-    expect(findWorstVuln(vulns)).toEqual("High");
+    expect(findWorstVulnerability(vulns)).toEqual("High");
   });
 
   test("Returns unknown", () => {
@@ -119,11 +90,11 @@ describe("findWorstVuln", () => {
       }),
     ]);
 
-    expect(findWorstVuln(vulns)).toEqual("Unknown");
+    expect(findWorstVulnerability(vulns)).toEqual("Unknown");
   });
 
   test("Returns safe", () => {
-    expect(findWorstVuln({})).toEqual("Safe");
+    expect(findWorstVulnerability({})).toEqual("Safe");
   });
 });
 
@@ -134,26 +105,26 @@ describe("getVulnsCount", () => {
         VulnerabilityFactory.build({
           severity: {
             score: 7.4,
-            text: "High",
+            text: ThreatLevels.High,
           },
         }),
         VulnerabilityFactory.build({
           severity: {
             score: 7.4,
-            text: "High",
+            text: ThreatLevels.High,
           },
         }),
         VulnerabilityFactory.build({
           severity: {
             score: 7.4,
-            text: "Medium",
+            text: ThreatLevels.Medium,
           },
         }),
       ],
       [VulnerabilityFactory.build()],
     );
 
-    expect(getVulnCounts(vulns)).toEqual({ High: 2, Medium: 2 });
+    expect(getVulnerabilitySeverities(vulns)).toEqual({ high: 2, medium: 2 });
   });
   test("Works with unknown severity", () => {
     const vulns = buildVulnerabilitiesRecord(
@@ -167,7 +138,7 @@ describe("getVulnsCount", () => {
       [VulnerabilityFactory.build()],
     );
 
-    expect(getVulnCounts(vulns)).toEqual({ Unknown: 1, Medium: 1 });
+    expect(getVulnerabilitySeverities(vulns)).toEqual({ unknown: 1, medium: 1 });
   });
 });
 
@@ -178,51 +149,40 @@ describe("getVulnsCountText", () => {
         VulnerabilityFactory.build({
           severity: {
             score: 7.4,
-            text: "High",
+            text: ThreatLevels.High,
           },
         }),
       ],
       [VulnerabilityFactory.build()],
     );
 
-    expect(getVulnsCountText(vulns)).toEqual(
+    expect(getVulnerabilityCountText(vulns)).toEqual(
       "There are currently 0 Critical, 1 High, 1 Medium, 0 Low and 0 Unknown severity vulnerabilities",
     );
   });
 });
 
-describe("calculateTotalDependencyCount", () => {
-  test("Calculates total dependency count correctly", () => {
-    const tree = [
-      PackageFactory.build({ totalDependencies: 1 }),
-      PackageFactory.build({ totalDependencies: 0 }),
-    ] as NpmPackage[];
-
-    expect(calculateTotalDependencyCount(tree)).toEqual(3);
-  });
-});
-
 describe("sortBySeverity  ", () => {
-  test("Calculates total dependency count correctly", () => {
+  test("Orders vulnerabilities correctly", () => {
     const vulns = [
       VulnerabilityFactory.build({
         severity: {
-          text: "Critical",
+          text: ThreatLevels.Critical,
         },
       }),
       VulnerabilityFactory.build({
         severity: {
-          text: "High",
+          text: ThreatLevels.High,
         },
       }),
       VulnerabilityFactory.build({
         severity: {
-          text: "Medium",
+          text: ThreatLevels.Medium,
         },
       }),
       VulnerabilityFactory.build({
         severity: {
-          text: "Low",
+          text: ThreatLevels.Low,
         },
       }),
       VulnerabilityFactory.build({

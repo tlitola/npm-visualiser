@@ -1,9 +1,11 @@
 import { z } from "zod";
 import { PackageInfo, PackageVulnerability, downloadHistory, packageInfo, packageVulnerability } from "../Package";
+import { DepGraph } from "dependency-graph";
+import { NpmPackage } from "@/utils/PackageLock";
 
 const { signal } = new AbortController();
 
-export const fetchPackageInfo = async (name: string, version: string): Promise<PackageInfo> => {
+export const fetchDependencyInfo = async (name: string, version: string): Promise<PackageInfo> => {
   const result = await fetch(`/api/dependency/${name}/${version}`, { signal });
   return packageInfo.parse(await result.json());
 };
@@ -13,15 +15,14 @@ export const fetchDownloadsHistory = async (name: string) => {
   return downloadHistory.parse(await result.json());
 };
 
-export const fetchAllPackagesInfo = async (
-  packages: [string, string][],
+export const fetchAllDependenciesInfo = async (
+  graph: DepGraph<NpmPackage>,
 ): Promise<Record<string, PackageInfo> | undefined> => {
-  if (packages.length === 0) return undefined;
+  const dependencies = Object.values(graph.nodes);
+  if (dependencies.length === 0) return undefined;
   const result = await Promise.all(
-    packages.map(async (el) => {
-      const [name, version] = el;
-
-      return { [`${name}@${version}`]: await fetchPackageInfo(name, version) };
+    dependencies.map(async (dep) => {
+      return { [dep.integrity]: await fetchDependencyInfo(dep.name ?? "", dep.version ?? "") };
     }),
   );
 
@@ -30,22 +31,25 @@ export const fetchAllPackagesInfo = async (
   }, {});
 };
 
-export const fetchPackageVulnerabilities = async (name: string, version: string): Promise<PackageVulnerability[]> => {
+export const fetchDependencyVulnerabilities = async (
+  name: string,
+  version: string,
+): Promise<PackageVulnerability[]> => {
   const result = await fetch(`/api/dependency/vulnerabilities/${name}/${version}`);
   const data = await result.json();
   return z.array(packageVulnerability).parse(data);
 };
 
-export const fetchAllPackagesVulnerabilites = async (
-  packages: [string, string][],
+export const fetchAllDependenciesVulnerabilities = async (
+  graph: DepGraph<NpmPackage>,
 ): Promise<Record<string, PackageVulnerability[]> | undefined> => {
-  if (packages.length === 0) return undefined;
-  const result = await Promise.all(
-    packages.map(async (el) => {
-      const [name, version] = el;
+  const dependencies = Object.values(graph.nodes);
+  if (dependencies.length === 0) return undefined;
 
+  const result = await Promise.all(
+    dependencies.map(async (dependency) => {
       return {
-        [`${name}@${version}`]: await fetchPackageVulnerabilities(name, version),
+        [dependency.integrity]: await fetchDependencyVulnerabilities(dependency.name ?? "", dependency.version),
       };
     }),
   );

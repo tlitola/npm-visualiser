@@ -80,6 +80,7 @@ const osvVulnerabilityResponse = z.object({
 export default class PackageInfoFetcher {
   private readonly limiter: LimitFunction;
   private readonly cache?: Cache;
+
   constructor(cache?: Cache) {
     this.limiter = pLimit(50);
     this.cache = cache;
@@ -213,7 +214,7 @@ export default class PackageInfoFetcher {
   async getPackageVulnerabilities(packageName: string, version: string) {
     const vulnerabilities = await this.fetchPackageVulnerabilities(packageName, version);
 
-    const data = (vulnerabilities?.vulns ?? []).map((vuln) => {
+    return (vulnerabilities?.vulns ?? []).map((vuln) => {
       const severityResult = vuln.severity?.find((el) => el.type?.includes("CVSS"))?.score;
 
       const severity = severityResult
@@ -237,8 +238,6 @@ export default class PackageInfoFetcher {
         severity,
       });
     });
-
-    return data;
   }
 
   async safelyFetchJson<T>(

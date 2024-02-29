@@ -1,0 +1,154 @@
+.Loader {
+  height: 128px;
+  width: 128px;
+}
+
+.Line {
+  border: 2px solid #4682b4;
+  border-radius: 100%;
+  box-sizing: border-box;
+  height: 128px;
+  width: 128px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.Spinner {
+  position: absolute;
+  height: 64px;
+  width: 128px;
+  overflow: hidden;
+  transform-origin: 50% 100%;
+  animation: spin 2000ms cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+
+.Spinner:nth-child(2) {
+  animation-delay: -50ms;
+}
+
+.Spinner:nth-child(3) {
+  animation-delay: -100ms;
+}
+
+.Spinner:nth-child(4) {
+  animation-delay: -150ms;
+}
+
+.Spinner:nth-child(5) {
+  animation-delay: -200ms;
+}
+
+.Spinner:nth-child(6) {
+  animation-delay: -250ms;
+}
+
+.Spinner:nth-child(7) {
+  animation-delay: -300ms;
+}
+
+.Spinner:nth-child(8) {
+  animation-delay: -350ms;
+}
+
+.Spinner:nth-child(9) {
+  animation-delay: -400ms;
+}
+
+.Spinner:nth-child(10) {
+  animation-delay: -450ms;
+}
+
+.Spinner:nth-child(11) {
+  animation-delay: -500ms;
+}
+
+.Spinner:nth-child(12) {
+  animation-delay: -550ms;
+}
+
+.Spinner:nth-child(2) .Line {
+  border-color: #588bae;
+  height: 118px;
+  width: 118px;
+  margin-top: 5px;
+}
+
+.Spinner:nth-child(3) .Line {
+  border-color: #7285a5;
+  height: 108px;
+  width: 108px;
+  margin-top: 10px;
+}
+
+.Spinner:nth-child(4) .Line {
+  border-color: #57a0d3;
+  height: 98px;
+  width: 98px;
+  margin-top: 15px;
+}
+
+.Spinner:nth-child(5) .Line {
+  border-color: #95c8d8;
+  height: 88px;
+  width: 88px;
+  margin-top: 20px;
+}
+
+.Spinner:nth-child(6) .Line {
+  border-color: #b0dfe5;
+  height: 78px;
+  width: 78px;
+  margin-top: 25px;
+}
+
+.Spinner:nth-child(7) .Line {
+  border-color: #89cff0;
+  height: 68px;
+  width: 68px;
+  margin-top: 30px;
+}
+
+.Spinner:nth-child(8) .Line {
+  border-color: #73c2fb;
+  height: 58px;
+  width: 58px;
+  margin-top: 35px;
+}
+
+.Spinner:nth-child(9) .Line {
+  border-color: #81d8d0;
+  height: 48px;
+  width: 48px;
+  margin-top: 40px;
+}
+
+.Spinner:nth-child(10) .Line {
+  border-color: #7ef9ff;
+  height: 38px;
+  width: 38px;
+  margin-top: 45px;
+}
+
+.Spinner:nth-child(11) .Line {
+  border-color: #3fe0d0;
+  height: 28px;
+  width: 28px;
+
+  margin-top: 50px;
+}
+
+.Spinner:nth-child(12) .Line {
+  border-color: #4f97a3;
+  height: 18px;
+  width: 18px;
+  margin-top: 55px;
+}

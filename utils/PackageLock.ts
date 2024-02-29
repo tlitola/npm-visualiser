@@ -1,33 +1,24 @@
 import { z } from "zod";
 
 //Zod schemas for handling package tree
-const basePackage = z
+export const npmPackage = z
   .object({
     name: z.string(),
     //There doesn't seem to be a way to merge z.object and z.record without the rules of the latter affecting the first one
     //Version should be optional with key "" but required otherwise, hence offer default if the version is missing
     version: z.string().default("undefined"),
-    resolved: z.string(),
-    integrity: z.string(),
-    cyclic: z.boolean(),
+    resolved: z.string().default("undefined"),
+    integrity: z.string().default("undefined"),
+    optional: z.boolean(),
+    peer: z.boolean(),
   })
-  .partial()
+  .partial({ peer: true, optional: true, name: true })
   .passthrough();
 
-export type NpmPackage = z.infer<typeof basePackage> & {
-  dependencies?: NpmPackage[];
-  devDependencies?: NpmPackage[];
-  totalDependencies: number;
-};
-
-export const npmPackage: z.ZodType<NpmPackage> = basePackage.extend({
-  dependencies: z.lazy(() => npmPackage.array()).optional(),
-  devDependencies: z.lazy(() => npmPackage.array()).optional(),
-  totalDependencies: z.number(),
-});
+export type NpmPackage = z.infer<typeof npmPackage>;
 
 //Zod schema for reading package-lock.json file
-export const lockFilePackage = basePackage.extend({
+export const lockFilePackage = npmPackage.extend({
   dependencies: z.record(z.string(), z.string()).optional(),
 });
 
@@ -46,6 +37,8 @@ export const packageLock = z.object({
         //There doesn't seem to be a way to merge z.object and z.record without the rules of the latter affecting the first one
         //Version should be optional with key "" but required otherwise, hence offer default if the version is missing
         version: z.string().default("undefined"),
+        resolved: z.string().default("undefined"),
+        integrity: z.string().default("undefined"),
         dependencies: z.record(z.string()).optional(),
         devDependencies: z.record(z.string()).optional(),
       }),

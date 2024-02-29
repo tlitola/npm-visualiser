@@ -1,6 +1,4 @@
-import { PackageInfo, PackageVulnerability } from "@/utils/Package";
-import { NpmPackage } from "@/utils/PackageLock";
-import { capitalizeFirst, sortBySeverity, addMetricSuffix } from "@/utils/client/utils";
+import { addMetricSuffix, capitalizeFirst, sortBySeverity } from "@/utils/client/utils";
 import { faGithub, faNpm } from "@fortawesome/free-brands-svg-icons";
 import { faHome } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,20 +7,26 @@ import { PropsWithChildren, useMemo, useState } from "react";
 import { Accordion, CloseButton, Col, Modal, Row, Stack } from "react-bootstrap";
 import Tag from "../Tag";
 import dynamic from "next/dynamic";
+import { useDependencyGraph } from "@/utils/hooks/useDependencyGraph";
+import { useDependencyMetadata } from "@/utils/hooks/useDependencyMetadata";
+import { NPM_BASE_URL, ThreatLevels } from "@/utils/constants/constants";
 
-export default function DepepndencyModal({
-  dependency,
+export default function DependencyModal({
+  dependencyKey,
   show,
-  info,
-  vulns,
   hide,
 }: {
-  dependency: NpmPackage;
-  info?: PackageInfo;
-  vulns: PackageVulnerability[];
+  dependencyKey: string;
   show: boolean;
   hide: () => void;
 }) {
+  const graph = useDependencyGraph().graph;
+  const dependency = graph.getNodeData(dependencyKey);
+
+  const { dependencyInfo, vulnerabilities: allVulnerabilities } = useDependencyMetadata();
+  const info = dependencyInfo[dependency.integrity];
+  const vulnerabilities = allVulnerabilities[dependency.integrity] ?? [];
+
   const [downloads, setDownloads] = useState<[string, number]>(["Weekly downloads", NaN]);
 
   const DownloadsChart = useMemo(
@@ -32,14 +36,12 @@ export default function DepepndencyModal({
       }),
     [],
   );
-
-  const baseLink = "https://www.npmjs.com/package/";
   return (
     <Modal size="lg" show={show} onHide={hide}>
       <Modal.Header className="tw-flex tw-flex-col !tw-place-items-start tw-px-4 tw-pt-4">
         <Modal.Title className="!tw-text-3xl">
           {dependency.name}
-          <Tag className="tw-ml-4 !tw-p-2" params={{ type: "version", version: dependency.version ?? "" }} />
+          <Tag className="tw-ml-4 !tw-p-2" params={{ type: "version", version: dependency.version }} />
         </Modal.Title>
         <Stack direction="horizontal" gap={3} className="tw-mt-2">
           {info?.homepage && (
@@ -57,7 +59,7 @@ export default function DepepndencyModal({
             </Link>
           )}
           <Link
-            href={baseLink + dependency.name ?? ""}
+            href={NPM_BASE_URL + dependency.name ?? ""}
             target="_blank"
             className="tw-text-black hover:!tw-text-gray-600"
           >
@@ -66,50 +68,48 @@ export default function DepepndencyModal({
         </Stack>
         <CloseButton className="tw-absolute tw-right-6 tw-top-6" onClick={hide} />
       </Modal.Header>
-      <Modal.Body className="tw-px-4 tw-pb-4 tw-overflow-scroll tw-max-h-[calc(94vh-41px-110px)]">
+      <Modal.Body className="tw-max-h-[calc(94vh-41px-110px)] tw-overflow-scroll tw-px-4 tw-pb-4">
         <Row>
           <Col sm={7} className="tw-border-r-[1px] tw-border-r-gray-200">
             <ModalTitle>Description</ModalTitle>
             <p>{info?.description}</p>
             <ModalTitle>Dependencies</ModalTitle>
-            <p>{dependency.dependencies?.length}</p>
-            <ModalTitle>Vulnerabilities ({vulns?.length ?? 0})</ModalTitle>
+            <p>{graph.directDependenciesOf(dependencyKey).length}</p>
+            <ModalTitle>Vulnerabilities ({vulnerabilities.length ?? 0})</ModalTitle>
             <div>
               <Accordion flush>
-                {sortBySeverity(vulns)?.map((el, i) => (
-                  <Accordion.Item key={el.id} eventKey={i.toString()}>
+                {sortBySeverity(vulnerabilities).map((vulnerability, i) => (
+                  <Accordion.Item key={vulnerability.id} eventKey={i.toString()}>
                     <Stack
-                      key={el.name}
+                      key={vulnerability.id}
                       direction="horizontal"
-                      className="tw-justify-between tw-w-full tw-items-center"
+                      className="tw-w-full tw-items-center tw-justify-between"
                     >
-                      <p className="tw-my-auto">{el.id}</p>
+                      <p className="tw-my-auto">{vulnerability.id}</p>
                       <Stack direction="horizontal">
-                        {el?.severity?.text && (
-                          <p
-                            className={`bg-vuln-${
-                              el.severity?.text ?? "Unknown"
-                            } tw-py-[1px] tw-px-2 tw-rounded-lg tw-my-auto tw-mr-4`}
-                          >
-                            {capitalizeFirst(el.severity?.text)}
-                          </p>
-                        )}
-                        <Accordion.Button className="tw-w-auto !tw-shadow-none !tw-bg-transparent tw-p-0" />
+                        <p
+                          className={`bg-vuln-${
+                            vulnerability.severity?.text ?? ThreatLevels.Unknown
+                          } tw-my-auto tw-mr-4 tw-rounded-lg tw-px-2 tw-py-[1px]`}
+                        >
+                          {capitalizeFirst(vulnerability.severity?.text ?? ThreatLevels.Unknown)}
+                        </p>
+                        <Accordion.Button className="tw-w-auto !tw-bg-transparent tw-p-0 !tw-shadow-none" />
                       </Stack>
                     </Stack>
                     <Accordion.Body className="tw-pt-1">
-                      {el.to && (
+                      {vulnerability.to && (
                         <p className="tw-mb-1">
                           <b className="tw-text-gray-700">Affected versions:</b>{" "}
-                          {el.from && (
-                            <span title={el.from === "0" ? "The exact introduced commit is unknown" : ""}>
-                              {el.from} -{" "}
+                          {vulnerability.from && (
+                            <span title={vulnerability.from === "0" ? "The exact introduced commit is unknown" : ""}>
+                              {vulnerability.from} -{" "}
                             </span>
                           )}
-                          {el.to}
+                          {vulnerability.to}
                         </p>
                       )}
-                      <p className="tw-break-words">{el.details}</p>
+                      <p className="tw-break-words">{vulnerability.details}</p>
                     </Accordion.Body>
                   </Accordion.Item>
                 ))}
@@ -118,14 +118,14 @@ export default function DepepndencyModal({
           </Col>
           <Col sm={5}>
             <ModalTitle>{downloads[0]}</ModalTitle>
-            <Stack direction={"horizontal"} className="tw-border-b-[1px] tw-h-[50px] tw-border-b-gray-200 !tw-mb-4">
-              <p className="tw-mr-4 tw-mt-auto tw-mb-0 tw-font-medium tw-w-1/2">{downloads[1]?.toLocaleString("en")}</p>
+            <Stack direction={"horizontal"} className="!tw-mb-4 tw-h-[50px] tw-border-b-[1px] tw-border-b-gray-200">
+              <p className="tw-mb-0 tw-mr-4 tw-mt-auto tw-w-1/2 tw-font-medium">{downloads[1]?.toLocaleString("en")}</p>
               <DownloadsChart packageName={dependency.name ?? ""} updateValue={setDownloads} />
             </Stack>
             <Row>
               <Col>
                 <ModalTitle>License</ModalTitle>
-                <p>{info?.license}</p>
+                {info?.license ? <p>{info?.license}</p> : <p>-</p>}
               </Col>
               <Col>
                 <ModalTitle>Unpacked size</ModalTitle>
@@ -148,5 +148,5 @@ export default function DepepndencyModal({
 }
 
 function ModalTitle({ children }: PropsWithChildren) {
-  return <h6 className="tw-text-gray-700 tw-mb-1">{children}</h6>;
+  return <h6 className="tw-mb-1 tw-text-gray-700">{children}</h6>;
 }
