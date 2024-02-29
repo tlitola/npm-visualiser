@@ -1,7 +1,7 @@
 import { PackageInfo, PackageVulnerability } from "../Package";
 import { NpmPackage } from "../PackageLock";
 import { DepGraph } from "dependency-graph";
-import { CVSSThreadLevel, ThreadLevels, VULNERABILITY_SEVERITY_ORDER } from "@/utils/constants/constants";
+import { CVSSThreadLevel, ThreadLevels, VULNERABILITY_SEVERITY_ORDER } from "../constants/constants";
 
 const dividers: [number, string][] = [
   [1e12, "T"],

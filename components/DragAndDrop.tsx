@@ -41,7 +41,7 @@ export default function DragAndDrop({
     setDragging(false);
     setDroppable(false);
 
-    if (!disabled && e.dataTransfer.files && e.dataTransfer.files.length === 0) {
+    if (!disabled && e.dataTransfer.files && e.dataTransfer.files.length !== 0) {
       onFileInput(e.dataTransfer.files[0], setError);
     }
   };
