@@ -25,7 +25,6 @@ export const buildPackageInfoRecord = (...packages: PackageInfo[]) =>
 export const PackageFactory = Factory.define<NpmPackage>(({ sequence }) => ({
   name: "Name " + sequence,
   version: sequence.toString(),
-  totalDependencies: sequence,
-  dependencies: [],
-  devDependencies: [],
+  integrity: "Integrity " + sequence,
+  resolved: "Resolved " + sequence,
 }));
