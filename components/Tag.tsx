@@ -2,7 +2,7 @@ import { faCircleExclamation, faRotateBack, faWarning } from "@fortawesome/free-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ComponentPropsWithoutRef } from "react";
 import { Badge } from "react-bootstrap";
-import { CVSSThreadLevel } from "@/utils/constants/constants";
+import { CVSSThreatLevel } from "@/utils/constants/constants";
 
 export default function Tag({
   params,
@@ -11,8 +11,8 @@ export default function Tag({
   params:
     | { type: "version"; version: string }
     | { type: "warning"; message: string }
-    | { type: "danger"; severity: CVSSThreadLevel }
-    | { type: "dangerChildren"; severity: CVSSThreadLevel }
+    | { type: "danger"; severity: CVSSThreatLevel }
+    | { type: "dangerChildren"; severity: CVSSThreatLevel }
     | { type: "circular" };
 } & ComponentPropsWithoutRef<"div">) {
   let tag = <Badge></Badge>;

@@ -1,6 +1,6 @@
-export const NPM_API_BASE_URL = "https://www.npmjs.com/package/" as const;
+export const NPM_BASE_URL = "https://www.npmjs.com/package/" as const;
 
-export const VULNERABILITY_SEVERITY_ORDER: Record<CVSSThreadLevel, number> = {
+export const VULNERABILITY_SEVERITY_ORDER: Record<CVSSThreatLevel, number> = {
   critical: 0,
   high: 1,
   medium: 2,
@@ -9,7 +9,7 @@ export const VULNERABILITY_SEVERITY_ORDER: Record<CVSSThreadLevel, number> = {
   safe: 5,
 };
 
-export enum ThreadLevels {
+export enum ThreatLevels {
   "Low" = "low",
   "Medium" = "medium",
   "High" = "high",
@@ -18,4 +18,4 @@ export enum ThreadLevels {
   "Safe" = "safe",
 }
 
-export type CVSSThreadLevel = `${ThreadLevels}`;
+export type CVSSThreatLevel = `${ThreatLevels}`;

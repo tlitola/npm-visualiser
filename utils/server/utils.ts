@@ -1,13 +1,13 @@
 import { parseCvssVector } from "vuln-vects";
 import { z } from "zod";
 import { npmDownloadsResponse } from "./packageInfoFetcher";
-import { CVSSThreadLevel, ThreadLevels } from "@/utils/constants/constants";
+import { CVSSThreatLevel, ThreatLevels } from "@/utils/constants/constants";
 
-export const getVulnerabilitySeverity = (vector: string): CVSSThreadLevel => {
+export const getVulnerabilitySeverity = (vector: string): CVSSThreatLevel => {
   const severity = parseCvssVector(vector).cvss3OverallSeverityText.toLowerCase();
-  return Object.values(ThreadLevels).includes(severity as ThreadLevels)
-    ? (severity as CVSSThreadLevel)
-    : ThreadLevels.Unknown;
+  return Object.values(ThreatLevels).includes(severity as ThreatLevels)
+    ? (severity as CVSSThreatLevel)
+    : ThreatLevels.Unknown;
 };
 
 export const getVulnerabilityScore = (vector: string) => {

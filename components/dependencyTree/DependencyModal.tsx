@@ -9,7 +9,7 @@ import Tag from "../Tag";
 import dynamic from "next/dynamic";
 import { useDependencyGraph } from "@/utils/hooks/useDependencyGraph";
 import { useDependencyMetadata } from "@/utils/hooks/useDependencyMetadata";
-import { NPM_API_BASE_URL } from "@/utils/constants/constants";
+import { NPM_BASE_URL, ThreatLevels } from "@/utils/constants/constants";
 
 export default function DependencyModal({
   dependencyKey,
@@ -59,7 +59,7 @@ export default function DependencyModal({
             </Link>
           )}
           <Link
-            href={NPM_API_BASE_URL + dependency.name ?? ""}
+            href={NPM_BASE_URL + dependency.name ?? ""}
             target="_blank"
             className="tw-text-black hover:!tw-text-gray-600"
           >
@@ -89,10 +89,10 @@ export default function DependencyModal({
                       <Stack direction="horizontal">
                         <p
                           className={`bg-vuln-${
-                            vulnerability.severity?.text ?? "Unknown"
+                            vulnerability.severity?.text ?? ThreatLevels.Unknown
                           } tw-my-auto tw-mr-4 tw-rounded-lg tw-px-2 tw-py-[1px]`}
                         >
-                          {capitalizeFirst(vulnerability.severity?.text ?? "Unknown")}
+                          {capitalizeFirst(vulnerability.severity?.text ?? ThreatLevels.Unknown)}
                         </p>
                         <Accordion.Button className="tw-w-auto !tw-bg-transparent tw-p-0 !tw-shadow-none" />
                       </Stack>

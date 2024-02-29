@@ -10,7 +10,7 @@ import {
 } from "./utils";
 import { buildPackageInfoRecord, PackageInfoFactory } from "@/test/factories/packageInfoFactory";
 import { buildVulnerabilitiesRecord, VulnerabilityFactory } from "@/test/factories/vulnerabilityFactory";
-import { ThreadLevels } from "../constants/constants";
+import { ThreatLevels } from "../constants/constants";
 
 describe("addMetricSuffix", () => {
   test("Adds correct suffix", () => {
@@ -73,7 +73,7 @@ describe("findWorstVuln", () => {
         VulnerabilityFactory.build({
           severity: {
             score: 7.4,
-            text: ThreadLevels.High,
+            text: ThreatLevels.High,
           },
         }),
       ],
@@ -105,19 +105,19 @@ describe("getVulnsCount", () => {
         VulnerabilityFactory.build({
           severity: {
             score: 7.4,
-            text: ThreadLevels.High,
+            text: ThreatLevels.High,
           },
         }),
         VulnerabilityFactory.build({
           severity: {
             score: 7.4,
-            text: ThreadLevels.High,
+            text: ThreatLevels.High,
           },
         }),
         VulnerabilityFactory.build({
           severity: {
             score: 7.4,
-            text: ThreadLevels.Medium,
+            text: ThreatLevels.Medium,
           },
         }),
       ],
@@ -149,7 +149,7 @@ describe("getVulnsCountText", () => {
         VulnerabilityFactory.build({
           severity: {
             score: 7.4,
-            text: ThreadLevels.High,
+            text: ThreatLevels.High,
           },
         }),
       ],
@@ -167,22 +167,22 @@ describe("sortBySeverity  ", () => {
     const vulns = [
       VulnerabilityFactory.build({
         severity: {
-          text: ThreadLevels.Critical,
+          text: ThreatLevels.Critical,
         },
       }),
       VulnerabilityFactory.build({
         severity: {
-          text: ThreadLevels.High,
+          text: ThreatLevels.High,
         },
       }),
       VulnerabilityFactory.build({
         severity: {
-          text: ThreadLevels.Medium,
+          text: ThreatLevels.Medium,
         },
       }),
       VulnerabilityFactory.build({
         severity: {
-          text: ThreadLevels.Low,
+          text: ThreatLevels.Low,
         },
       }),
       VulnerabilityFactory.build({

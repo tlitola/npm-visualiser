@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ThreadLevels } from "./constants/constants";
+import { ThreatLevels } from "./constants/constants";
 
 export const packageInfo = z
   .object({
@@ -39,7 +39,7 @@ export const packageVulnerability = z.object({
   severity: z
     .object({
       score: z.number(),
-      text: z.nativeEnum(ThreadLevels),
+      text: z.nativeEnum(ThreatLevels),
       vector: z.string().optional(),
     })
     .optional(),

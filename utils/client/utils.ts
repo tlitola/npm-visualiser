@@ -1,7 +1,7 @@
 import { PackageInfo, PackageVulnerability } from "../Package";
 import { NpmPackage } from "../PackageLock";
 import { DepGraph } from "dependency-graph";
-import { CVSSThreadLevel, ThreadLevels, VULNERABILITY_SEVERITY_ORDER } from "../constants/constants";
+import { CVSSThreatLevel, ThreatLevels, VULNERABILITY_SEVERITY_ORDER } from "../constants/constants";
 
 const dividers: [number, string][] = [
   [1e12, "T"],
@@ -48,24 +48,27 @@ export const getChildrenVulnerabilities = (
   return childrenVulns;
 };
 
-export const findWorstVulnerability = (vulns: Record<string, PackageVulnerability[]>): string => {
-  const text = Object.values(vulns).reduce(
-    (acc, el) => {
-      return el.reduce((acc2, vuln) => {
-        if (!vuln.severity && acc[1] === ThreadLevels.Safe)
-          return [0, ThreadLevels.Unknown] as [number, CVSSThreadLevel];
+export const findWorstVulnerability = (vulnerabilities: Record<string, PackageVulnerability[]>): string => {
+  const text = Object.values(vulnerabilities).reduce(
+    (acc: [number, CVSSThreatLevel], vulns: PackageVulnerability[]) => {
+      return vulns.reduce((acc2: [number, CVSSThreatLevel], vuln: PackageVulnerability) => {
+        //If we have a vulnerability, whose severity we don't know, and the threatlevel is still safe, set level to unknown.
+        if (!vuln.severity && acc2[1] === ThreatLevels.Safe)
+          return [0, ThreatLevels.Unknown] satisfies [number, CVSSThreatLevel];
+        //If we don't know the severity, we can't update the severity
         if (!vuln.severity) return acc2;
-        return (acc2[0] as number) >= vuln.severity?.score
-          ? acc2
-          : ([vuln.severity?.score, vuln.severity?.text] as [number, CVSSThreadLevel]);
+        //If we know the severity and the severity is more severe, update acc
+        return acc2[0] < vuln.severity.score
+          ? ([vuln.severity.score, vuln.severity.text] satisfies [number, CVSSThreatLevel])
+          : acc2;
       }, acc);
     },
-    [0, ThreadLevels.Safe] as [number, CVSSThreadLevel],
+    [0, ThreatLevels.Safe],
   )[1];
 
-  return (Object.values(ThreadLevels) as string[]).includes(text)
+  return (Object.values(ThreatLevels) as string[]).includes(text)
     ? capitalizeFirst(text)
-    : capitalizeFirst(ThreadLevels.Unknown);
+    : capitalizeFirst(ThreatLevels.Unknown);
 };
 
 export const getVulnerabilityCount = (vulns: Record<string, PackageVulnerability[]>) => {
@@ -76,12 +79,12 @@ export const getVulnerabilitySeverities = (vulns: Record<string, PackageVulnerab
   return Object.values(vulns).reduce(
     (acc, vuln) => {
       vuln.forEach((vuln2) => {
-        const key = vuln2.severity?.text ?? ThreadLevels.Unknown;
+        const key = vuln2.severity?.text ?? ThreatLevels.Unknown;
         acc[key] = (acc[key] ?? 0) + 1;
       });
       return acc;
     },
-    {} as { [key in CVSSThreadLevel]: number | undefined },
+    {} as { [key in CVSSThreatLevel]: number | undefined },
   );
 };
 
@@ -99,7 +102,7 @@ export const capitalizeFirst = <TString extends string>(s: TString) => {
 export const sortBySeverity = (vulns: PackageVulnerability[]) => {
   return [...(vulns ?? [])].sort(
     (vuln1, vuln2) =>
-      VULNERABILITY_SEVERITY_ORDER[vuln1.severity?.text ?? ThreadLevels.Unknown] -
-      VULNERABILITY_SEVERITY_ORDER[vuln2.severity?.text ?? ThreadLevels.Unknown],
+      VULNERABILITY_SEVERITY_ORDER[vuln1.severity?.text ?? ThreatLevels.Unknown] -
+      VULNERABILITY_SEVERITY_ORDER[vuln2.severity?.text ?? ThreatLevels.Unknown],
   );
 };

@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import DependencyModal from "./DependencyModal";
 import { useDependencyGraph } from "@/utils/hooks/useDependencyGraph";
 import { DependencyNodeIcons } from "@/components/dependencyTree/DependencyNodeIcons";
-import { NPM_API_BASE_URL } from "@/utils/constants/constants";
+import { NPM_BASE_URL } from "@/utils/constants/constants";
 
 export default function DependencyNode({
   dependencyKey,
@@ -51,7 +51,7 @@ export default function DependencyNode({
         }}
       >
         <Link
-          href={`${NPM_API_BASE_URL}${dependency.name ?? ""}`}
+          href={`${NPM_BASE_URL}${dependency.name ?? ""}`}
           target="_blank"
           className="tw-peer tw-my-0 !tw-mr-2 tw-ml-0 tw-text-black tw-no-underline"
           onClick={(e) => e.stopPropagation()}
