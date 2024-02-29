@@ -4,13 +4,11 @@ import { NpmPackage } from "@/utils/PackageLock";
 import { readLockFile } from "@/utils/client/parser";
 import { useEffect, useState } from "react";
 import DragAndDrop from "../DragAndDrop";
-import { Card } from "react-bootstrap";
 import useSWRMutation from "swr/mutation";
 import { useRouter } from "next/navigation";
 import { useSWRConfig } from "swr";
 import { DepGraph } from "dependency-graph";
 import { createDependencyGraph } from "@/utils/client/dependencyTreeParser";
-import Loading from "@/components/loading/Loading";
 
 const { signal } = new AbortController();
 
@@ -71,7 +69,7 @@ export default function LockfileInput() {
   return (
     <>
       <div className="tw-relative tw-w-screen">
-        <DragAndDrop disabled={loadingStatus.isLoading} onFileInput={updateDependencyTree} className="tw-pb-6" />
+        <DragAndDrop loading={loadingStatus.isLoading} onFileInput={updateDependencyTree} className="tw-pb-6" />
         <p
           onClick={async () => {
             const file = new File(
@@ -83,25 +81,13 @@ export default function LockfileInput() {
             );
             await updateDependencyTree(file, () => {});
           }}
-          className="tw-absolute -tw-bottom-2 tw-right-1/2 tw-translate-x-1/2 tw-cursor-pointer tw-font-light tw-italic tw-text-gray-500 tw-underline hover:tw-text-gray-700"
+          className={`${
+            loadingStatus.isLoading && "tw-hidden"
+          } tw-absolute -tw-bottom-2 tw-right-1/2 tw-translate-x-1/2 tw-cursor-pointer tw-font-light tw-italic tw-text-gray-500 tw-underline hover:tw-text-gray-700`}
         >
           Use example lockfile
         </p>
       </div>
-      {loadingStatus.isLoading && (
-        <>
-          <div
-            className={`tw-fixed tw-left-0 tw-top-0 tw-z-0 tw-h-screen tw-w-screen tw-bg-black tw-opacity-40 tw-transition-all `}
-          />
-          <Card className="!tw-fixed tw-top-1/2 tw-flex !tw-h-1/2 tw-w-5/6 -tw-translate-y-1/2 tw-flex-col tw-items-center tw-justify-center tw-px-12">
-            <h2 className="tw-w-[333px] tw-font-bold tw-text-slate-700 after:tw-inline-block after:tw-w-0 after:tw-animate-dots after:tw-overflow-hidden after:tw-align-bottom after:tw-content-['…']">
-              Parsing the lockfile
-            </h2>
-            <p className="tw-mb-12 tw-text-xl tw-font-medium tw-text-slate-700">This should only take a few seconds</p>
-            <Loading />
-          </Card>
-        </>
-      )}
     </>
   );
 }
