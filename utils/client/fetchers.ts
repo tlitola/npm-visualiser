@@ -5,11 +5,6 @@ import { NpmPackage } from "@/utils/PackageLock";
 
 const { signal } = new AbortController();
 
-export const fetchDependencyInfo = async (name: string, version: string): Promise<PackageInfo> => {
-  const result = await fetch(`/api/dependency/${name}/${version}`, { signal });
-  return packageInfo.parse(await result.json());
-};
-
 export const fetchDownloadsHistory = async (name: string) => {
   const result = await fetch(`/api/download_history/${name}`, { signal });
   return downloadHistory.parse(await result.json());
@@ -20,41 +15,49 @@ export const fetchAllDependenciesInfo = async (
 ): Promise<Record<string, PackageInfo> | undefined> => {
   const dependencies = Object.values(graph.nodes);
   if (dependencies.length === 0) return undefined;
-  const result = await Promise.all(
-    dependencies.map(async (dep) => {
-      return { [dep.integrity]: await fetchDependencyInfo(dep.name ?? "", dep.version ?? "") };
-    }),
-  );
+  const dependenciesString = getDependencyString(dependencies);
 
-  return result.reduce((acc, el) => {
-    return { ...acc, ...el };
+  const result = z
+    .object({
+      missing: z.array(z.string()),
+      data: z.record(z.string(), packageInfo),
+    })
+    .parse(await (await fetch(`/api/dependency?dependencies=${dependenciesString}`, { signal })).json());
+
+  return Object.entries(result.data).reduce((acc: Record<string, PackageInfo>, el) => {
+    const [key, value] = el;
+    const dependency = dependencies.find((dep) => key === `${dep.name}:${dep.version}`);
+    if (!dependency) return acc;
+    acc[dependency.integrity] = value;
+    return acc;
   }, {});
 };
 
-export const fetchDependencyVulnerabilities = async (
-  name: string,
-  version: string,
-): Promise<PackageVulnerability[]> => {
-  const result = await fetch(`/api/dependency/vulnerabilities/${name}/${version}`);
-  const data = await result.json();
-  return z.array(packageVulnerability).parse(data);
-};
-
-export const fetchAllDependenciesVulnerabilities = async (
+export const fetchVulnerabilities = async (
   graph: DepGraph<NpmPackage>,
 ): Promise<Record<string, PackageVulnerability[]> | undefined> => {
   const dependencies = Object.values(graph.nodes);
   if (dependencies.length === 0) return undefined;
+  const dependenciesString = getDependencyString(dependencies);
 
-  const result = await Promise.all(
-    dependencies.map(async (dependency) => {
-      return {
-        [dependency.integrity]: await fetchDependencyVulnerabilities(dependency.name ?? "", dependency.version),
-      };
-    }),
-  );
+  const result = z
+    .object({
+      missing: z.array(z.string()),
+      data: z.record(z.string(), z.array(packageVulnerability)),
+    })
+    .parse(
+      await (await fetch(`/api/dependency/vulnerabilities?dependencies=${dependenciesString}`, { signal })).json(),
+    );
 
-  return result.reduce((acc, el) => {
-    return Object.values(el)[0].length > 0 ? { ...acc, ...el } : acc;
+  return Object.entries(result.data).reduce((acc: Record<string, PackageVulnerability[]>, el) => {
+    const [key, value] = el;
+    const dependency = dependencies.find((dep) => key === `${dep.name}:${dep.version}`);
+    if (!dependency) return acc;
+    if (value.length === 0) return acc;
+    acc[dependency.integrity] = value;
+    return acc;
   }, {});
 };
+
+const getDependencyString = (dependencies: NpmPackage[]) =>
+  dependencies.map((dep) => `${dep.name}:${dep.version}`).join(",");

@@ -1,10 +1,10 @@
 import { handleWithCache } from "@/utils/server/cache";
 import PackageInfoFetcher from "@/utils/server/packageInfoFetcher";
 import { NextRequest } from "next/server";
-import { dependencyInfoHandler } from "./handler";
+import { vulnerabilityHandler } from "./handler";
 
-export const GET = async (request: NextRequest, { params }: { params: { package: string[] } }) =>
+export const GET = async (request: NextRequest) =>
   handleWithCache((cache) => {
     const fetcher = new PackageInfoFetcher(cache);
-    return dependencyInfoHandler(fetcher, params);
+    return vulnerabilityHandler(fetcher, request);
   });

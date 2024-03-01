@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import { fetchAllDependenciesInfo, fetchAllDependenciesVulnerabilities } from "@/utils/client/fetchers";
+import { fetchAllDependenciesInfo, fetchVulnerabilities } from "@/utils/client/fetchers";
 import { useDependencyGraph } from "@/utils/hooks/useDependencyGraph";
 
 export const useDependencyMetadata = () => {
@@ -9,11 +9,9 @@ export const useDependencyMetadata = () => {
     revalidateOnFocus: false,
   });
 
-  const { data: vulnerabilities } = useSWR(
-    "packageVulnerability",
-    () => fetchAllDependenciesVulnerabilities(dependencyGraph.graph),
-    { revalidateOnFocus: false },
-  );
+  const { data: vulnerabilities } = useSWR("packageVulnerability", () => fetchVulnerabilities(dependencyGraph.graph), {
+    revalidateOnFocus: false,
+  });
 
   return {
     dependencyInfo: dependencyInfo ?? {},
